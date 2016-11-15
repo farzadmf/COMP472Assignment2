@@ -44,6 +44,10 @@ class Board:
         # Total number of flips because of a move
         self.__flips = 0
 
+        # Configure heuristic functions for different agent types
+        self.heuristics = dict()
+        self.heuristics[AgentType.greedy] = self.get_current_player_count
+
     def clone(self):
         """
         Returns a copy of the current board
@@ -145,8 +149,8 @@ class Board:
         Return the string representation of the board
         :return: string representation of the board
         """
-        return self.__display()
-        # return str(self.__pieces)
+        # return self.__display()
+        return str(self.__pieces)
 
     def count(self, color=10):
         """
@@ -336,6 +340,16 @@ class Board:
                 return flips
         return []
 
+    # ################# Functions used for heuristics ##########################
+
+    def get_current_player_count(self):
+        return self.count(self.__turn)
+
+    def get_other_player_count(self):
+        return self.count(-self.__turn)
+
+    # ##########################################################################
+
     @staticmethod
     def _increment_move(move, direction):
         """
@@ -403,7 +417,7 @@ class Board:
         return "Black" if color == -1 else "White" if color == 1 else "UNKNOWN"
 
 
-from my_minimax import *
+from mini_max import *
 
 if __name__ == '__main__':
     first_board = Board()

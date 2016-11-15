@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>ba3468ae-6504-4052-8816-0fe8b39f1b75</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>
+    </StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>COMP472Assignment2</Name>
+    <RootNamespace>COMP472Assignment2</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Images\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\1.gif" />
+    <Content Include="Images\2.gif" />
+    <Content Include="Images\3.gif" />
+    <Content Include="Images\4.gif" />
+    <Content Include="Images\5.gif" />
+    <Content Include="Images\6.gif" />
+    <Content Include="Images\7.gif" />
+    <Content Include="Images\8.gif" />
+    <Content Include="Images\A.gif" />
+    <Content Include="Images\B.gif" />
+    <Content Include="Images\black.gif" />
+    <Content Include="Images\black_small.gif" />
+    <Content Include="Images\C.gif" />
+    <Content Include="Images\D.gif" />
+    <Content Include="Images\E.gif" />
+    <Content Include="Images\empty.gif" />
+    <Content Include="Images\empty_small.gif" />
+    <Content Include="Images\F.gif" />
+    <Content Include="Images\G.gif" />
+    <Content Include="Images\H.gif" />
+    <Content Include="Images\last_move_black.gif" />
+    <Content Include="Images\last_move_white.gif" />
+    <Content Include="Images\Next.gif" />
+    <Content Include="Images\Next.png" />
+    <Content Include="Images\Play.gif" />
+    <Content Include="Images\Play.png" />
+    <Content Include="Images\Previous.gif" />
+    <Content Include="Images\Previous.png" />
+    <Content Include="Images\Reset.gif" />
+    <Content Include="Images\Reset.png" />
+    <Content Include="Images\Tokens.png" />
+    <Content Include="Images\valid_move.gif" />
+    <Content Include="Images\valid_move2.gif" />
+    <Content Include="Images\white.gif" />
+    <Content Include="Images\white_small.gif" />
+    <Content Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="board.py" />
+    <Compile Include="mini_max.py" />
+    <Compile Include="othello.py" />
+    <Compile Include="player.py" />
+    <Compile Include="their_othello.py" />
+    <Compile Include="utils.py" />
+  </ItemGroup>
+  <Import Condition="Exists($(PtvsTargetsFile))" Project="$(PtvsTargetsFile)" />
+  <Import Condition="!Exists($(PtvsTargetsFile))" Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
