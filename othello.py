@@ -106,7 +106,7 @@ class Othello:
         self.reset_button.pack(side=LEFT, padx=40)
 
         self.previous_move_button = ttk.Button(self.buttons_frame, text='Previous Move',
-                                               command=lambda: self.previous_move())
+                                               command=self.previous_move)
         self.previous_move_button.img = self.previous_icon
         self.previous_move_button.config(image=self.previous_move_button.img, compound=LEFT)
         self.previous_move_button.pack(side=LEFT, padx=10)
@@ -264,8 +264,11 @@ class Othello:
                 else:
                     cell_label.img = self.empty_token if move not in valid_moves else self.valid_move
 
+                # Enable selecting the move by mouse for a human player, but we don't want to do it if we're moving
+                #   through move history
                 if move in valid_moves and self.current_player != 0 and isinstance(
-                        self.players[self.current_player], HumanPlayer):
+                        self.players[self.current_player], HumanPlayer) and self.move_history_index == len(
+                        self.all_moves):
 
                     cell_label.bind('<ButtonPress-1>', self.make_move_human)
                 else:
@@ -273,17 +276,21 @@ class Othello:
 
                 cell_label.config(image=cell_label.img)
 
-        # Update the turn label
-        self.turn_label.config(text='Current Player: {}'.format(
-            'NONE' if self.current_player == 0 else
-            '{} ({})'.format(self.players[self.current_player], Board.get_color_string(self.current_player))))
-        self.total_moves_label.config(text='Total moves: {}'.format(len(self.all_moves)))
-
         # Update next and previous move buttons
         all_moves = len(self.all_moves)
         self.previous_move_button.config(state=DISABLED if self.move_history_index == 0 else NORMAL)
         self.next_move_button.config(
             state=DISABLED if self.move_history_index == all_moves or all_moves == 0 else NORMAL)
+
+        # Update the turn label
+        self.turn_label.config(text='Current Player: {}'.format(
+            'NONE' if self.current_player == 0 else
+            '{} ({})'.format(self.players[self.current_player], Board.get_color_string(self.current_player))))
+        self.total_moves_label.config(
+            text='Total moves: {}{}'.format(len(self.all_moves),
+                                            ' (Current Move: {})'.format(self.move_history_index)
+                                            if self.move_history_index != all_moves and self.move_history_index != 0
+                                            else ''))
 
         # The make-move button should be disabled in the following cases:
         #   *) We're moving through move history and we're not in the last move
@@ -291,12 +298,12 @@ class Othello:
         #   *) Current player is a human player
         #   *) Game is over (of course!)
         self.make_move_button.config(state=DISABLED
-                                     if self.move_history_index != all_moves or
-                                     self.current_player == 0 or
-                                     isinstance(self.players[self.current_player], HumanPlayer) or
-                                     self.board.is_game_over()
+        if self.move_history_index != all_moves or
+           self.current_player == 0 or
+           isinstance(self.players[self.current_player], HumanPlayer) or
+           self.board.is_game_over()
 
-                                     else NORMAL)
+        else NORMAL)
 
     def start_game(self):
         if self.black_player_name.get() == '' or self.white_player_name.get() == '':
@@ -417,9 +424,9 @@ class Othello:
                     self.players[BLACK] if black_score > white_score else self.players[WHITE],
                     Board.get_color_string(BLACK) if black_score > white_score else Board.get_color_string(WHITE))
 
-            game_over_message += '\n\nFinal Score of the players:\n' +\
-                'Black:      {}\n'.format(black_score) +\
-                'White:     {}'.format(white_score)
+            game_over_message += '\n\nFinal Score of the players:\n' + \
+                                 'Black:      {}\n'.format(black_score) + \
+                                 'White:     {}'.format(white_score)
 
             messagebox.showinfo(title='Game Over',
                                 message=game_over_message)
@@ -438,8 +445,10 @@ class Othello:
 
     def go_to_move(self):
         self.board = Board()
+        self.current_player = self.board.get_turn()
         for i in range(self.move_history_index):
             self.board = self.board.execute_move(self.all_moves[i])
+            self.change_turn()
 
         self.update()
 

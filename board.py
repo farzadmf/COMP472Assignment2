@@ -29,7 +29,7 @@ class Board:
     # List of all 8 directions on the board, as (x,y) offsets
     __directions = [(1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1)]
 
-    def __init__(self, turn=-1):
+    def __init__(self, turn=BLACK):
         """ Set up initial board configuration. """
         # Create the empty board array
         self.__pieces = [None] * 8
@@ -377,21 +377,11 @@ class Board:
         :param direction: the direction to follow
         :return: moves in the specified direction
         """
-        # ###move = map(sum, zip(move, direction))
         move = list(map(sum, list(zip(move, direction))))
-        # move_direction_zip = list(zip(move, direction))
-        # move = list(map(sum, move_direction_zip))
-        # boundary_check = list(map(lambda x: 0 <= x < 8, move))
 
-        # ###while all(map(lambda x: 0 <= x < 8, move)):
         while all(list(map(lambda x: 0 <= x < 8, move))):
-        # while all(boundary_check):
             yield move
-            # ###move = map(sum, zip(move, direction))
             move = list(map(sum, list(zip(move, direction))))
-            # move_direction_zip = list(zip(move, direction))
-            # move = list(map(sum, move_direction_zip))
-            # boundary_check = list(map(lambda x: 0 <= x < 8, move))
 
     @staticmethod
     def get_col_char(col):
