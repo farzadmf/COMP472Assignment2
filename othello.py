@@ -304,11 +304,6 @@ class Othello:
                                  message='Please specify the name of both players')
             return
 
-        if len(self.players) > 0 and messagebox.askquestion(
-                title='Reset Game', message='This will reset the game. Are you sure?') == 'no':
-
-            return
-
         self.players = dict()
         self.current_player = 0
 
