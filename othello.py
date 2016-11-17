@@ -268,7 +268,7 @@ class Othello:
                 #   through move history
                 if move in valid_moves and self.current_player != 0 and isinstance(
                         self.players[self.current_player], HumanPlayer) and self.move_history_index == len(
-                        self.all_moves):
+                    self.all_moves):
 
                     cell_label.bind('<ButtonPress-1>', self.make_move_human)
                 else:
@@ -298,12 +298,12 @@ class Othello:
         #   *) Current player is a human player
         #   *) Game is over (of course!)
         self.make_move_button.config(state=DISABLED
-        if self.move_history_index != all_moves or
-           self.current_player == 0 or
-           isinstance(self.players[self.current_player], HumanPlayer) or
-           self.board.is_game_over()
+                                     if self.move_history_index != all_moves or
+                                     self.current_player == 0 or
+                                     isinstance(self.players[self.current_player], HumanPlayer) or
+                                     self.board.is_game_over()
 
-        else NORMAL)
+                                     else NORMAL)
 
     def start_game(self):
         if self.black_player_name.get() == '' or self.white_player_name.get() == '':
