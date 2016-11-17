@@ -1,8 +1,14 @@
 from board import Board
 from mini_max import AlphaBeta, AgentType
+from enum import Enum
 
 BLACK = -1
 WHITE = 1
+
+
+class PlayerType(Enum):
+    human = 'Human'
+    greedy = 'Greedy'
 
 
 class Player:
@@ -26,8 +32,8 @@ class HumanPlayer(Player):
 
 class GreedyPlayer(Player):
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, color):
+        super().__init__(name, color)
         self.player_type = AgentType.greedy
 
     def get_best_move(self, board: Board, max_level):

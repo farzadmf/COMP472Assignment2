@@ -19,10 +19,45 @@ class Othello:
         self.all_moves = []
         self.move_history_index = 0
 
+        # ++++++++++++++++++++++++++++++ Frames ++++++++++++++++++++++++++++++++++
         # Header frame
         self.header_frame = ttk.Frame(master)
         self.header_frame.pack(padx=10, pady=10)
 
+        # Frame containing buttons
+        self.buttons_frame = ttk.Frame(self.header_frame)
+        self.buttons_frame.pack()
+
+        # Frame for configuring players
+        self.players_frame = ttk.Frame(self.header_frame)
+        self.players_frame.pack(fill=X, padx=10, pady=10)
+
+        # Content frame containing game and table
+        self.content_frame = ttk.Frame(master)
+        self.content_frame.pack()
+
+        # Frames containing letters
+        self.left_numbers = ttk.Frame(self.content_frame)
+        self.right_numbers = ttk.Frame(self.content_frame)
+        self.left_numbers.grid(row=1, column=0)
+        self.right_numbers.grid(row=1, column=2)
+
+        # Frames containing numbers
+        self.top_letters = ttk.Frame(self.content_frame)
+        self.bottom_letters = ttk.Frame(self.content_frame)
+        self.top_letters.grid(row=0, column=1)
+        self.bottom_letters.grid(row=2, column=1)
+
+        # Frame containing the game
+        self.game_frame = ttk.Frame(self.content_frame)
+        self.game_frame.grid(row=1, column=1)
+
+        # Footer frame
+        self.footer_frame = ttk.Frame(master)
+        self.footer_frame.pack(fill=X, padx=10, pady=10)
+        # ------------------------------------------------------------------------
+
+        # ++++++++++++++++++++++ Images and Icons ++++++++++++++++++++++++++++++++
         # Images for cells
         self.black_token = PhotoImage(file='Images/black_small.gif')
         self.white_token = PhotoImage(file='Images/white_small.gif')
@@ -56,40 +91,73 @@ class Othello:
         self.previous_icon = PhotoImage(file='Images/previous.gif')
         self.play_icon = PhotoImage(file='Images/play.gif')
         self.reset_icon = PhotoImage(file='Images/reset.gif')
+        # ------------------------------------------------------------------------
 
         # TODO: temporary widgets
-        self.make_move_button = ttk.Button(self.header_frame, text='Make Move', command=lambda: self.make_move())
+        self.make_move_button = ttk.Button(self.buttons_frame, text='Make Move', command=lambda: self.make_move())
         self.make_move_button.img = self.play_icon
         self.make_move_button.config(image=self.make_move_button.img, compound=LEFT)
         self.make_move_button.pack(side=LEFT, padx=10)
 
-        self.reset_button = ttk.Button(self.header_frame, text='Reset Game', command=lambda: self.reset_game())
+        self.reset_button = ttk.Button(self.buttons_frame, text='Reset Game', command=lambda: self.reset_game())
         self.reset_button.img = self.reset_icon
         self.reset_button.config(image=self.reset_button.img, compound=LEFT)
         self.reset_button.pack(side=LEFT, padx=40)
 
-        self.previous_move_button = ttk.Button(self.header_frame, text='Previous Move',
+        self.previous_move_button = ttk.Button(self.buttons_frame, text='Previous Move',
                                                command=lambda: self.previous_move())
         self.previous_move_button.img = self.previous_icon
         self.previous_move_button.config(image=self.previous_move_button.img, compound=LEFT)
         self.previous_move_button.pack(side=LEFT, padx=10)
 
-        self.next_move_button = ttk.Button(self.header_frame, text='Next Move', command=lambda: self.next_move())
+        self.next_move_button = ttk.Button(self.buttons_frame, text='Next Move', command=lambda: self.next_move())
         self.next_move_button.img = self.next_icon
         self.next_move_button.config(image=self.next_move_button.img, compound=LEFT)
         self.next_move_button.pack(side=LEFT, padx=10)
 
-        ttk.Button(self.header_frame, text='Test Button', command=lambda: self.test_me()).pack(side=LEFT, padx=10)
+        ttk.Button(self.buttons_frame, text='Test Button', command=lambda: self.test_me()).pack(side=LEFT, padx=10)
 
-        # Middle frame containing game and table
-        self.content_frame = ttk.Frame(master)
-        self.content_frame.pack()
+        # +++++++++++++++++++++++++ Configure players ++++++++++++++++++++++++++++
+        # Controls for configuring players
+        self.black_player_name = StringVar()
+        self.white_player_name = StringVar()
+        self.black_player_type = StringVar()
+        self.white_player_type = StringVar()
 
-        # Frames containing letters
-        self.left_numbers = ttk.Frame(self.content_frame)
-        self.right_numbers = ttk.Frame(self.content_frame)
-        self.left_numbers.grid(row=1, column=0)
-        self.right_numbers.grid(row=1, column=2)
+        # Default player types
+        self.black_player_type.set(PlayerType.human.value)
+        self.white_player_type.set(PlayerType.human.value)
+
+        # Black player configuration frame and controls
+        self.black_player_frame = ttk.LabelFrame(self.players_frame, text='Black Player Config')
+        self.black_player_frame.pack(side=LEFT)
+        ttk.Label(self.black_player_frame, text='Name: ').grid(row=0, column=0, sticky='e')
+        self.black_player_name_entry = ttk.Entry(self.black_player_frame, width=20,
+                                                 textvariable=self.black_player_name)
+        self.black_player_name_entry.grid(row=0, column=1, padx=5, sticky='w')
+        ttk.Label(self.black_player_frame, text='Type: ').grid(row=1, column=0, sticky='e')
+        self.black_player_type_combo = ttk.Combobox(
+            self.black_player_frame,
+            width=17,
+            values=list(member.value for _, member in PlayerType.__members__.items()),
+            textvariable=self.black_player_type)
+        self.black_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
+
+        # White player configuration frame and controls
+        self.white_player_frame = ttk.LabelFrame(self.players_frame, text='White Player Config')
+        self.white_player_frame.pack(side=LEFT, padx=20)
+        ttk.Label(self.white_player_frame, text='Name: ').grid(row=0, column=0, sticky='e')
+        self.white_player_name_entry = ttk.Entry(self.white_player_frame, width=20,
+                                                 textvariable=self.white_player_name)
+        self.white_player_name_entry.grid(row=0, column=1, padx=5, sticky='w')
+        ttk.Label(self.white_player_frame, text='Type: ').grid(row=1, column=0, sticky='e')
+        self.white_player_type_combo = ttk.Combobox(
+            self.white_player_frame,
+            width=17,
+            values=list(member.value for _, member in PlayerType.__members__.items()),
+            textvariable=self.white_player_type)
+        self.white_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
+        # ------------------------------------------------------------------------
 
         # Add number labels to their frames
         for i in range(len(self.numbers) - 1, -1, -1):
@@ -102,12 +170,6 @@ class Othello:
             left_letter_label.pack(padx=5, pady=5)
             right_letter_label.pack(padx=5, pady=5)
 
-        # Frames containing numbers
-        self.top_letters = ttk.Frame(self.content_frame)
-        self.bottom_letters = ttk.Frame(self.content_frame)
-        self.top_letters.grid(row=0, column=1)
-        self.bottom_letters.grid(row=2, column=1)
-
         # Add letter labels to their frame
         for i in range(len(self.letters)):
             top_number_label = ttk.Label(self.top_letters)
@@ -118,14 +180,6 @@ class Othello:
             bottom_number_label.config(image=bottom_number_label.img)
             top_number_label.pack(side=LEFT, padx=5, pady=5)
             bottom_number_label.pack(side=LEFT, padx=5, pady=5)
-
-        # Frame containing the game
-        self.game_frame = ttk.Frame(self.content_frame)
-        self.game_frame.grid(row=1, column=1)
-
-        # Footer frame
-        self.footer_frame = ttk.Frame(master)
-        self.footer_frame.pack(fill=X, padx=10, pady=10)
 
         # TODO: temporary widgets
         self.turn_label = ttk.Label(self.footer_frame)
@@ -139,9 +193,7 @@ class Othello:
         self.time_label.pack(fill=X, side=RIGHT)
         self.start_time()
 
-        # For styling
-        self.style = ttk.Style()
-
+        # +++++++++++++++++++++++++++ Board grid +++++++++++++++++++++++++++++++++
         # Initialize all the cells to empty
         self.labels = [None] * 8
         for i in range(8):
@@ -155,10 +207,14 @@ class Othello:
                 new_label.row = label_row
                 new_label.column = label_column
                 new_label.grid(row=7 - label_column, column=label_row, padx=5, pady=5)
+        # ------------------------------------------------------------------------
 
         # Set up the players
         self.players = []
         self.current_player = -1
+
+        # ++++++++++++++++++++++++++++++ Styles ++++++++++++++++++++++++++++++++++
+        self.style = ttk.Style()
 
         # Change the background color for the game frame to black
         self.style.configure('GameFrame.TFrame', background='black')
@@ -169,6 +225,7 @@ class Othello:
         self.top_letters.config(style='GameFrame.TFrame')
         self.bottom_letters.config(style='GameFrame.TFrame')
         self.update()
+        # ------------------------------------------------------------------------
 
         # Put the window in the center of the screen
         master.update_idletasks()
@@ -176,7 +233,7 @@ class Othello:
         screen_height = master.winfo_screenheight()
         window_width, window_height = tuple(int(_) for _ in master.geometry().split('+')[0].split('x'))
         window_x = screen_width // 2 - window_width // 2
-        window_y = screen_height // 2 - window_height // 2 - 50
+        window_y = screen_height // 2 - window_height // 2 - 35
         master.geometry('{}x{}+{}+{}'.format(window_width, window_height, window_x, window_y))
 
     def update(self):
@@ -233,7 +290,7 @@ class Othello:
         self.display_time()
 
     def display_time(self):
-        #now = strftime('%H:%M:%S')
+        # now = strftime('%H:%M:%S')
         current_value = int(self.time_label.cget('text'))
         if current_value == 1:
             self.time_label.config(text='0')
@@ -246,6 +303,10 @@ class Othello:
         self.current_player = (self.current_player + 1) % 2
 
     def reset_game(self):
+        self.black_player_type.set(PlayerType.human.value)
+        self.white_player_type.set(PlayerType.human.value)
+        self.black_player_name.set('')
+        self.white_player_name.set('')
         self.board = Board()
         self.all_moves = []
         self.last_move = tuple()
@@ -315,4 +376,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

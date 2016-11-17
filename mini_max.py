@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class AgentType(Enum):
-    greedy = 'greedy'
+    greedy = 'Greedy'
 
 
 class AlphaBeta:
