@@ -1,4 +1,3 @@
-from board import Board
 from enum import Enum
 
 
@@ -12,10 +11,10 @@ class AlphaBeta:
         self._max_depth = max_depth
         self.agent_type = agent_type
 
-    def get_best_action_and_value(self, board: Board):
+    def get_best_action_and_value(self, board):
         return self.maxi_min(board, 0, float("-inf"), float("inf"))
 
-    def maxi_min(self, board: Board, depth: int, alpha, beta):
+    def maxi_min(self, board, depth: int, alpha, beta):
         if depth == self._max_depth or board.is_game_over():
             evaluation_function = board.heuristics[self.agent_type]
             return None, evaluation_function()
@@ -37,7 +36,7 @@ class AlphaBeta:
 
         return best_move, alpha
 
-    def mini_max(self, board: Board, depth: int, alpha, beta):
+    def mini_max(self, board, depth: int, alpha, beta):
         if depth == self._max_depth or board.is_game_over():
             evaluation_function = board.heuristics[self.agent_type]
             return None, evaluation_function()

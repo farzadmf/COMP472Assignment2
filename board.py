@@ -19,6 +19,10 @@ Board data:
 Squares are stored and manipulated as (x,y) tuples. 
 x is the column, y is the row.
 """
+from mini_max import AgentType
+
+BLACK = -1
+WHITE = 1
 
 
 class Board:
@@ -33,10 +37,10 @@ class Board:
             self.__pieces[i] = [0] * 8
 
         # Set up the initial 4 pieces
-        self.__pieces[3][4] = 1
-        self.__pieces[4][3] = 1
-        self.__pieces[3][3] = -1
-        self.__pieces[4][4] = -1
+        self.__pieces[3][4] = WHITE
+        self.__pieces[4][3] = WHITE
+        self.__pieces[3][3] = BLACK
+        self.__pieces[4][4] = BLACK
 
         # Current turn
         self.__turn = turn
@@ -82,7 +86,7 @@ class Board:
 
     def is_game_over(self):
         """ Check whether the game is over """
-        return len(self.get_legal_moves(1)) == 0 and len(self.get_legal_moves(-1)) == 0
+        return len(self.get_legal_moves(WHITE)) == 0 and len(self.get_legal_moves(BLACK)) == 0
 
     # ###def display(self, time):
     def __display(self):
@@ -169,6 +173,21 @@ class Board:
                 if self[x][y] == color:
                     count += 1
         return count
+
+    def get_final_score(self):
+        """
+        Get the final score of the two players; first one is for black, and second one is for white
+        :return:
+        """
+        black_count = self.count(BLACK)
+        white_count = self.count(WHITE)
+        total = black_count + white_count
+        if black_count == white_count:
+            return black_count, white_count
+        elif black_count > white_count:
+            return black_count + 64 - total, white_count
+        else:
+            return black_count, white_count + 64 - total
 
     def get_squares(self, color=10):
         """
@@ -359,17 +378,20 @@ class Board:
         :return: moves in the specified direction
         """
         # ###move = map(sum, zip(move, direction))
-        move_direction_zip = list(zip(move, direction))
-        move = list(map(sum, move_direction_zip))
-        boundary_check = list(map(lambda x: 0 <= x < 8, move))
+        move = list(map(sum, list(zip(move, direction))))
+        # move_direction_zip = list(zip(move, direction))
+        # move = list(map(sum, move_direction_zip))
+        # boundary_check = list(map(lambda x: 0 <= x < 8, move))
 
         # ###while all(map(lambda x: 0 <= x < 8, move)):
-        while all(boundary_check):
+        while all(list(map(lambda x: 0 <= x < 8, move))):
+        # while all(boundary_check):
             yield move
             # ###move = map(sum, zip(move, direction))
-            move_direction_zip = list(zip(move, direction))
-            move = list(map(sum, move_direction_zip))
-            boundary_check = list(map(lambda x: 0 <= x < 8, move))
+            move = list(map(sum, list(zip(move, direction))))
+            # move_direction_zip = list(zip(move, direction))
+            # move = list(map(sum, move_direction_zip))
+            # boundary_check = list(map(lambda x: 0 <= x < 8, move))
 
     @staticmethod
     def get_col_char(col):
@@ -414,58 +436,5 @@ class Board:
         :param color: integer value of the color (-1 for Black, 1 for White)
         :return: string representation of the specified color
         """
-        return "Black" if color == -1 else "White" if color == 1 else "UNKNOWN"
+        return "Black" if color == BLACK else "White" if color == WHITE else "UNKNOWN"
 
-
-from mini_max import *
-
-if __name__ == '__main__':
-    first_board = Board()
-    print(first_board)
-    first_board.print_statistics()
-    # board.display({-1: 60, 1: 60})
-    #
-    # print "Black: ",
-    # print_moves(board.get_legal_moves(-1))
-    #
-    # print "White: ",
-    # print_moves(board.get_legal_moves(1))
-
-    # for successor_move, board in first_board.get_successors():
-    #     print(MyBoard.move_string(successor_move))
-    #     print(board)
-    #     print("===============================================")
-
-    hello = AlphaBeta(5)
-    next_move, value = hello.get_best_action_and_value(first_board)
-    first_board = first_board.execute_move(next_move)
-    print(first_board)
-    next_move, value = hello.get_best_action_and_value(first_board)
-    first_board = first_board.execute_move(next_move)
-    print(first_board)
-    legal_moves = first_board.get_legal_moves()
-    print(legal_moves)
-    print(Board.moves_string(legal_moves))
-    print(first_board.is_game_over())
-
-    # start = [3, 4]
-    # valid_moves = board.get_moves_for_square(start)
-    # print(valid_moves)
-    # cell_x, cell_y = start
-    # cell_color = int(board[cell_x][cell_y])
-    # print(cell_color)
-    # board.display()
-    # print()
-    # print("Legal moves for black:")
-    # MyBoard.print_moves(board.get_legal_moves(-1))
-    # print("Legal moves for white:")
-    # MyBoard.print_moves(board.get_legal_moves(1))
-    # board.execute_move(valid_moves[0], cell_color)
-    # # board.execute_move(board.get_moves_for_square([3, 4])[1], color)
-    # # ###board.display({-1: 60, 1: 60})
-    # board.display()
-    # print()
-    # print("Legal moves for black:")
-    # MyBoard.print_moves(board.get_legal_moves(-1))
-    # print("Legal moves for white:")
-    # MyBoard.print_moves(board.get_legal_moves(1))

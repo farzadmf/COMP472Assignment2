@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
-from player import *
+from player import PlayerType, HumanPlayer, GreedyPlayer
+from board import Board, BLACK, WHITE
 import threading
 from time import *
 from tkinter import messagebox
@@ -22,15 +23,15 @@ class Othello:
         # ++++++++++++++++++++++++++++++ Frames ++++++++++++++++++++++++++++++++++
         # Header frame
         self.header_frame = ttk.Frame(master)
-        self.header_frame.pack(padx=10, pady=10)
+        self.header_frame.pack(fill=X)
+
+        # Frame for configuring players
+        self.players_frame = ttk.LabelFrame(self.header_frame, text='Player Configuration')
+        self.players_frame.pack(fill=X, padx=5, pady=(5, 0))
 
         # Frame containing buttons
         self.buttons_frame = ttk.Frame(self.header_frame)
         self.buttons_frame.pack()
-
-        # Frame for configuring players
-        self.players_frame = ttk.Frame(self.header_frame)
-        self.players_frame.pack(fill=X, padx=10, pady=10)
 
         # Content frame containing game and table
         self.content_frame = ttk.Frame(master)
@@ -54,7 +55,7 @@ class Othello:
 
         # Footer frame
         self.footer_frame = ttk.Frame(master)
-        self.footer_frame.pack(fill=X, padx=10, pady=10)
+        self.footer_frame.pack(fill=X)
         # ------------------------------------------------------------------------
 
         # ++++++++++++++++++++++ Images and Icons ++++++++++++++++++++++++++++++++
@@ -93,15 +94,15 @@ class Othello:
         self.reset_icon = PhotoImage(file='Images/reset.gif')
         # ------------------------------------------------------------------------
 
-        # TODO: temporary widgets
-        self.make_move_button = ttk.Button(self.buttons_frame, text='Make Move', command=lambda: self.make_move())
+        # Buttons for playing the game
+        self.make_move_button = ttk.Button(self.buttons_frame, text='Make Move', command=self.make_move)
         self.make_move_button.img = self.play_icon
         self.make_move_button.config(image=self.make_move_button.img, compound=LEFT)
         self.make_move_button.pack(side=LEFT, padx=10)
 
-        self.reset_button = ttk.Button(self.buttons_frame, text='Reset Game', command=lambda: self.reset_game())
+        self.reset_button = ttk.Button(self.buttons_frame, text='Reset Game', command=self.reset_game)
         self.reset_button.img = self.reset_icon
-        self.reset_button.config(image=self.reset_button.img, compound=LEFT)
+        self.reset_button.config(image=self.reset_button.img, compound=LEFT, state=DISABLED)
         self.reset_button.pack(side=LEFT, padx=40)
 
         self.previous_move_button = ttk.Button(self.buttons_frame, text='Previous Move',
@@ -110,12 +111,10 @@ class Othello:
         self.previous_move_button.config(image=self.previous_move_button.img, compound=LEFT)
         self.previous_move_button.pack(side=LEFT, padx=10)
 
-        self.next_move_button = ttk.Button(self.buttons_frame, text='Next Move', command=lambda: self.next_move())
+        self.next_move_button = ttk.Button(self.buttons_frame, text='Next Move', command=self.next_move)
         self.next_move_button.img = self.next_icon
         self.next_move_button.config(image=self.next_move_button.img, compound=LEFT)
         self.next_move_button.pack(side=LEFT, padx=10)
-
-        ttk.Button(self.buttons_frame, text='Test Button', command=lambda: self.test_me()).pack(side=LEFT, padx=10)
 
         # +++++++++++++++++++++++++ Configure players ++++++++++++++++++++++++++++
         # Controls for configuring players
@@ -129,8 +128,8 @@ class Othello:
         self.white_player_type.set(PlayerType.human.value)
 
         # Black player configuration frame and controls
-        self.black_player_frame = ttk.LabelFrame(self.players_frame, text='Black Player Config')
-        self.black_player_frame.pack(side=LEFT)
+        self.black_player_frame = ttk.LabelFrame(self.players_frame, text='Black   ')
+        self.black_player_frame.pack(side=LEFT, padx=(20, 10), pady=(0, 10))
         ttk.Label(self.black_player_frame, text='Name: ').grid(row=0, column=0, sticky='e')
         self.black_player_name_entry = ttk.Entry(self.black_player_frame, width=20,
                                                  textvariable=self.black_player_name)
@@ -144,8 +143,8 @@ class Othello:
         self.black_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
 
         # White player configuration frame and controls
-        self.white_player_frame = ttk.LabelFrame(self.players_frame, text='White Player Config')
-        self.white_player_frame.pack(side=LEFT, padx=20)
+        self.white_player_frame = ttk.LabelFrame(self.players_frame, text='White   ')
+        self.white_player_frame.pack(side=LEFT, padx=(100, 10), pady=(0, 10))
         ttk.Label(self.white_player_frame, text='Name: ').grid(row=0, column=0, sticky='e')
         self.white_player_name_entry = ttk.Entry(self.white_player_frame, width=20,
                                                  textvariable=self.white_player_name)
@@ -157,6 +156,15 @@ class Othello:
             values=list(member.value for _, member in PlayerType.__members__.items()),
             textvariable=self.white_player_type)
         self.white_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
+
+        # Update players button
+        self.start_game_button = ttk.Button(self.players_frame, text='Start Game',
+                                            command=self.start_game)
+        self.start_game_button.pack(side=LEFT, padx=(100, 0))
+
+        # Set up the players
+        self.players = dict()
+        self.current_player = 0
         # ------------------------------------------------------------------------
 
         # Add number labels to their frames
@@ -181,16 +189,22 @@ class Othello:
             top_number_label.pack(side=LEFT, padx=5, pady=5)
             bottom_number_label.pack(side=LEFT, padx=5, pady=5)
 
-        # TODO: temporary widgets
-        self.turn_label = ttk.Label(self.footer_frame)
-        self.turn_label.pack(fill=X)
+        # Status display controls in the footer frame
+        self.info_frame = ttk.Frame(self.footer_frame)  # Frame for turn and move labels
+        self.info_frame.pack(fill=X)
+
+        self.turn_label = ttk.Label(self.info_frame)
+        self.turn_label.pack(side=LEFT, padx=15, pady=3)
+
+        self.total_moves_label = ttk.Label(self.info_frame)
+        self.total_moves_label.pack(side=RIGHT, padx=15, pady=3)
 
         self.progress_bar = ttk.Progressbar(self.footer_frame, orient=HORIZONTAL)
         self.progress_bar.config(mode='indeterminate')
-        self.progress_bar.pack(fill=X)
+        self.progress_bar.pack(fill=X, padx=15)
 
         self.time_label = ttk.Label(self.footer_frame)
-        self.time_label.pack(fill=X, side=RIGHT)
+        self.time_label.pack(fill=X, side=RIGHT, padx=15)
         self.start_time()
 
         # +++++++++++++++++++++++++++ Board grid +++++++++++++++++++++++++++++++++
@@ -208,10 +222,6 @@ class Othello:
                 new_label.column = label_column
                 new_label.grid(row=7 - label_column, column=label_row, padx=5, pady=5)
         # ------------------------------------------------------------------------
-
-        # Set up the players
-        self.players = []
-        self.current_player = -1
 
         # ++++++++++++++++++++++++++++++ Styles ++++++++++++++++++++++++++++++++++
         self.style = ttk.Style()
@@ -254,21 +264,20 @@ class Othello:
                 else:
                     cell_label.img = self.empty_token if move not in valid_moves else self.valid_move
 
-                # TODO: this should be something that actually does something!!!
-                if move in valid_moves:
-                    cell_label.bind('<ButtonPress-1>', lambda event: print(
-                        '{}'.format(Board.move_string((event.widget.row, event.widget.column)))))
+                if move in valid_moves and self.current_player != 0 and isinstance(
+                        self.players[self.current_player], HumanPlayer):
+
+                    cell_label.bind('<ButtonPress-1>', self.make_move_human)
                 else:
                     cell_label.unbind('<ButtonPress-1>')
 
                 cell_label.config(image=cell_label.img)
 
         # Update the turn label
-        # TODO: do I need the number of flips???
-        self.turn_label.config(text='Number of flips: {}       Current Player: {},     Total moves: {}'.format(
-            self.board.get_last_flip_count(),
-            'NONE' if self.current_player == -1 else self.players[self.current_player],
-            len(self.all_moves)))
+        self.turn_label.config(text='Current Player: {}'.format(
+            'NONE' if self.current_player == 0 else
+            '{} ({})'.format(self.players[self.current_player], Board.get_color_string(self.current_player))))
+        self.total_moves_label.config(text='Total moves: {}'.format(len(self.all_moves)))
 
         # Update next and previous move buttons
         all_moves = len(self.all_moves)
@@ -276,14 +285,75 @@ class Othello:
         self.next_move_button.config(
             state=DISABLED if self.move_history_index == all_moves or all_moves == 0 else NORMAL)
 
-        # The make-move button should only be enabled when we go to the last move
-        self.make_move_button.config(state=DISABLED if self.move_history_index != all_moves else NORMAL)
+        # The make-move button should be disabled in the following cases:
+        #   *) We're moving through move history and we're not in the last move
+        #   *) No players are configured
+        #   *) Current player is a human player
+        #   *) Game is over (of course!)
+        self.make_move_button.config(state=DISABLED
+                                     if self.move_history_index != all_moves or
+                                     self.current_player == 0 or
+                                     isinstance(self.players[self.current_player], HumanPlayer) or
+                                     self.board.is_game_over()
 
-    # TODO: temporary function
-    def test_me(self):
-        for i in range(30):
-            self.make_move_button.invoke()
-            sleep(1)
+                                     else NORMAL)
+
+    def start_game(self):
+        if self.black_player_name.get() == '' or self.white_player_name.get() == '':
+            messagebox.showerror(title='Missing Player Info',
+                                 message='Please specify the name of both players')
+            return
+
+        if len(self.players) > 0 and messagebox.askquestion(
+                title='Reset Game', message='This will reset the game. Are you sure?') == 'no':
+
+            return
+
+        self.players = dict()
+        self.current_player = 0
+
+        black_player_type = PlayerType(self.black_player_type.get())
+        white_player_type = PlayerType(self.white_player_type.get())
+        black_player_name = self.black_player_name.get()
+        white_player_name = self.white_player_name.get()
+
+        if black_player_type == PlayerType.human:
+            self.players[BLACK] = HumanPlayer(black_player_name)
+        elif black_player_type == PlayerType.greedy:
+            self.players[BLACK] = GreedyPlayer(black_player_name)
+
+        if white_player_type == PlayerType.human:
+            self.players[WHITE] = HumanPlayer(white_player_name)
+        elif white_player_type == PlayerType.greedy:
+            self.players[WHITE] = GreedyPlayer(white_player_name)
+
+        self.current_player = BLACK
+
+        self.start_game_button.config(state=DISABLED)
+        self.reset_button.config(state=NORMAL)
+        self.update()
+
+    def reset_players(self):
+        self.black_player_type.set(PlayerType.human.value)
+        self.white_player_type.set(PlayerType.human.value)
+        self.black_player_name.set('')
+        self.white_player_name.set('')
+        self.players = []
+        self.current_player = 0
+
+    def reset_game(self):
+        if not messagebox.askyesno(title='Confirm Reset',
+                                   message='Are you sure you want to reset the game?'):
+            return
+
+        self.start_game_button.config(state=NORMAL)
+        self.reset_button.config(state=DISABLED)
+        self.reset_players()
+        self.board = Board()
+        self.all_moves = []
+        self.last_move = tuple()
+        self.move_history_index = 0
+        self.update()
 
     def start_time(self):
         self.time_label.config(text='5')
@@ -300,35 +370,23 @@ class Othello:
             self.time_label.after(1000, self.display_time)
 
     def change_turn(self):
-        self.current_player = (self.current_player + 1) % 2
-
-    def reset_game(self):
-        self.black_player_type.set(PlayerType.human.value)
-        self.white_player_type.set(PlayerType.human.value)
-        self.black_player_name.set('')
-        self.white_player_name.set('')
-        self.board = Board()
-        self.all_moves = []
-        self.last_move = tuple()
-        self.move_history_index = 0
-        self.update()
+        self.current_player *= -1
 
     def check_move_thread(self):
         if self.move_thread.is_alive():
             self.master.after(20, self.check_move_thread)
         else:
             self.progress_bar.stop()
-            self.make_move_button.config(state=NORMAL)
+
+    def make_move_human(self, event):
+        next_move = (event.widget.row, event.widget.column)
+        self.last_move = next_move
+        self.execute_move()
 
     def make_move(self):
         if self.board.is_game_over():
             print('GAME OVER MAN!')
             self.board.print_statistics()
-            return
-
-        if len(self.players) != 2 or self.current_player == -1:
-            messagebox.showerror(title='Insufficient Number of Players',
-                                 message='You must select the two players to continue playing')
             return
 
         self.move_thread = threading.Thread(target=self.get_move)
@@ -342,11 +400,34 @@ class Othello:
         current_player = self.players[self.current_player]
         next_move, value = current_player.get_best_move(self.board, 2)
         self.last_move = next_move
-        self.all_moves.append(next_move)
+        self.execute_move()
+
+    def execute_move(self):
+        self.all_moves.append(self.last_move)
         self.move_history_index += 1
-        self.board = self.board.execute_move(next_move)
+        self.board = self.board.execute_move(self.last_move)
         self.change_turn()
         self.update()
+
+        if self.board.is_game_over():
+            # Stop the progress bar
+            self.progress_bar.stop()
+
+            black_score, white_score = self.board.get_final_score()
+            game_over_message = 'Game Over!\n'
+            if white_score == black_score:
+                game_over_message += 'We have a tie!!!'
+            else:
+                game_over_message += '{} ({}) Wins the game!!!'.format(
+                    self.players[BLACK] if black_score > white_score else self.players[WHITE],
+                    Board.get_color_string(BLACK) if black_score > white_score else Board.get_color_string(WHITE))
+
+            game_over_message += '\n\nFinal Score of the players:\n' +\
+                'Black:      {}\n'.format(black_score) +\
+                'White:     {}'.format(white_score)
+
+            messagebox.showinfo(title='Game Over',
+                                message=game_over_message)
 
     def previous_move(self):
         self.move_history_index -= 1
