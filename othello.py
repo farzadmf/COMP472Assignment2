@@ -59,33 +59,35 @@ class Othello:
         # ------------------------------------------------------------------------
 
         # ++++++++++++++++++++++ Images and Icons ++++++++++++++++++++++++++++++++
-        # Images for cells
-        self.black_token = PhotoImage(file='Images/black_small.gif')
-        self.white_token = PhotoImage(file='Images/white_small.gif')
-        self.empty_token = PhotoImage(file='Images/empty_small.gif')
-        self.last_move_black = PhotoImage(file='Images/last_move_black.gif')
-        self.last_move_white = PhotoImage(file='Images/last_move_white.gif')
-        self.valid_move = PhotoImage(file='Images/valid_move2.gif')
+        image_dir = 'Images/Smaller'
 
-        # Images for the table
+        # Images for cells
+        self.black_token = PhotoImage(file='{}/black.gif'.format(image_dir))
+        self.white_token = PhotoImage(file='{}/white.gif'.format(image_dir))
+        self.empty_token = PhotoImage(file='{}/empty.gif'.format(image_dir))
+        self.last_move_black = PhotoImage(file='{}/last_move_black.gif'.format(image_dir))
+        self.last_move_white = PhotoImage(file='{}/last_move_white.gif'.format(image_dir))
+        self.valid_move = PhotoImage(file='{}/valid_move.gif'.format(image_dir))
+
+        # {} for the table
         self.letters = [None] * 8
         self.numbers = [None] * 8
-        self.letters[0] = PhotoImage(file='Images/A.gif')
-        self.letters[1] = PhotoImage(file='Images/B.gif')
-        self.letters[2] = PhotoImage(file='Images/C.gif')
-        self.letters[3] = PhotoImage(file='Images/D.gif')
-        self.letters[4] = PhotoImage(file='Images/E.gif')
-        self.letters[5] = PhotoImage(file='Images/F.gif')
-        self.letters[6] = PhotoImage(file='Images/G.gif')
-        self.letters[7] = PhotoImage(file='Images/H.gif')
-        self.numbers[0] = PhotoImage(file='Images/1.gif')
-        self.numbers[1] = PhotoImage(file='Images/2.gif')
-        self.numbers[2] = PhotoImage(file='Images/3.gif')
-        self.numbers[3] = PhotoImage(file='Images/4.gif')
-        self.numbers[4] = PhotoImage(file='Images/5.gif')
-        self.numbers[5] = PhotoImage(file='Images/6.gif')
-        self.numbers[6] = PhotoImage(file='Images/7.gif')
-        self.numbers[7] = PhotoImage(file='Images/8.gif')
+        self.letters[0] = PhotoImage(file='{}/A.gif'.format(image_dir))
+        self.letters[1] = PhotoImage(file='{}/B.gif'.format(image_dir))
+        self.letters[2] = PhotoImage(file='{}/C.gif'.format(image_dir))
+        self.letters[3] = PhotoImage(file='{}/D.gif'.format(image_dir))
+        self.letters[4] = PhotoImage(file='{}/E.gif'.format(image_dir))
+        self.letters[5] = PhotoImage(file='{}/F.gif'.format(image_dir))
+        self.letters[6] = PhotoImage(file='{}/G.gif'.format(image_dir))
+        self.letters[7] = PhotoImage(file='{}/H.gif'.format(image_dir))
+        self.numbers[0] = PhotoImage(file='{}/1.gif'.format(image_dir))
+        self.numbers[1] = PhotoImage(file='{}/2.gif'.format(image_dir))
+        self.numbers[2] = PhotoImage(file='{}/3.gif'.format(image_dir))
+        self.numbers[3] = PhotoImage(file='{}/4.gif'.format(image_dir))
+        self.numbers[4] = PhotoImage(file='{}/5.gif'.format(image_dir))
+        self.numbers[5] = PhotoImage(file='{}/6.gif'.format(image_dir))
+        self.numbers[6] = PhotoImage(file='{}/7.gif'.format(image_dir))
+        self.numbers[7] = PhotoImage(file='{}/8.gif'.format(image_dir))
 
         # Icons for buttons
         self.next_icon = PhotoImage(file='Images/next.gif')
