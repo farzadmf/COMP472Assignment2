@@ -388,11 +388,6 @@ class Othello:
         self.execute_move()
 
     def make_move(self):
-        if self.board.is_game_over():
-            print('GAME OVER MAN!')
-            self.board.print_statistics()
-            return
-
         self.move_thread = threading.Thread(target=self.get_move)
         self.move_thread.daemon = True
         self.make_move_button.config(state=DISABLED)

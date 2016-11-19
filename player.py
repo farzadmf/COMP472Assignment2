@@ -22,11 +22,17 @@ class Player:
     def __repr__(self):
         return self.__str__()
 
+    def get_type_name(self):
+        pass
+
 
 class HumanPlayer(Player):
 
     def get_best_move(self, board: Board, max_level):
         return None, 0
+
+    def get_type_name(self):
+        return 'Human'
 
 
 class GreedyPlayer(Player):
@@ -39,3 +45,5 @@ class GreedyPlayer(Player):
         agent = AlphaBeta(max_level, self.player_type)
         return agent.get_best_action_and_value(board)
 
+    def get_type_name(self):
+        return 'Greedy'

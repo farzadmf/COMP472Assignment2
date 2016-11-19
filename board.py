@@ -153,8 +153,8 @@ class Board:
         Return the string representation of the board
         :return: string representation of the board
         """
-        # return self.__display()
-        return str(self.__pieces)
+        return self.__display()
+        # return str(self.__pieces)
 
     def count(self, color=10):
         """
@@ -362,10 +362,7 @@ class Board:
     # ################# Functions used for heuristics ##########################
 
     def get_current_player_count(self):
-        return self.count(self.__turn)
-
-    def get_other_player_count(self):
-        return self.count(-self.__turn)
+        return self.count(self.__turn) - self.count(-self.__turn)
 
     # ##########################################################################
 
