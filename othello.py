@@ -36,7 +36,7 @@ class Othello:
 
         # Frame containing buttons
         self.buttons_frame = ttk.Frame(self.header_frame)
-        self.buttons_frame.pack()
+        self.buttons_frame.pack(fill=X, pady=5)
 
         # Content frame containing game and table
         self.content_frame = ttk.Frame(master)
@@ -99,29 +99,34 @@ class Othello:
         self.previous_icon = PhotoImage(file='Images/previous.gif')
         self.play_icon = PhotoImage(file='Images/play.gif')
         self.reset_icon = PhotoImage(file='Images/reset.gif')
+        self.stop_icon = PhotoImage(file='Images/stop.gif')
         # ------------------------------------------------------------------------
 
         # Buttons for playing the game
-        self.make_move_button = ttk.Button(self.buttons_frame, text='Make Move', command=self.make_move)
+        button_width = 13
+        self.make_move_button = ttk.Button(self.buttons_frame, text='Make Move', command=self.make_move,
+                                           width=button_width)
         self.make_move_button.img = self.play_icon
         self.make_move_button.config(image=self.make_move_button.img, compound=LEFT)
         self.make_move_button.pack(side=LEFT, padx=10)
 
-        self.reset_button = ttk.Button(self.buttons_frame, text='Reset Game', command=self.reset_game)
+        self.reset_button = ttk.Button(self.buttons_frame, text='Reset Game', command=self.reset_game,
+                                       width=button_width)
         self.reset_button.img = self.reset_icon
         self.reset_button.config(image=self.reset_button.img, compound=LEFT, state=DISABLED)
-        self.reset_button.pack(side=LEFT, padx=40)
+        self.reset_button.pack(side=LEFT, padx=10)
 
-        self.previous_move_button = ttk.Button(self.buttons_frame, text='Previous Move',
-                                               command=self.previous_move)
-        self.previous_move_button.img = self.previous_icon
-        self.previous_move_button.config(image=self.previous_move_button.img, compound=LEFT)
-        self.previous_move_button.pack(side=LEFT, padx=10)
-
-        self.next_move_button = ttk.Button(self.buttons_frame, text='Next Move', command=self.next_move)
+        self.next_move_button = ttk.Button(self.buttons_frame, text='Next Move', command=self.next_move,
+                                           width=button_width)
         self.next_move_button.img = self.next_icon
         self.next_move_button.config(image=self.next_move_button.img, compound=LEFT)
-        self.next_move_button.pack(side=LEFT, padx=10)
+        self.next_move_button.pack(side=RIGHT, padx=10)
+
+        self.previous_move_button = ttk.Button(self.buttons_frame, text='Previous Move',
+                                               command=self.previous_move, width=button_width)
+        self.previous_move_button.img = self.previous_icon
+        self.previous_move_button.config(image=self.previous_move_button.img, compound=LEFT)
+        self.previous_move_button.pack(side=RIGHT, padx=10)
 
         # +++++++++++++++++++++++++ Configure players ++++++++++++++++++++++++++++
         # Controls for configuring players
@@ -231,7 +236,7 @@ class Othello:
         self.info_frame.pack(fill=X, padx=15, pady=5)
 
         self.turn_label = ttk.Label(self.info_frame)
-        self.turn_label.config(background='green', foreground='white', text='Current player:',
+        self.turn_label.config(background='green', foreground='yellow', text='Current player:',
                                font=('Arial', 10))
         self.turn_label.grid(row=0, column=0, ipady=5, sticky='nsew')
 
@@ -472,6 +477,7 @@ class Othello:
             self.master.after(20, self.check_move_thread)
         else:
             self.progress_bar.stop()
+            self.stop_move_button.configure(state=DISABLED)
 
     def make_move_human(self, event):
         next_move = (event.widget.row, event.widget.column)
@@ -482,6 +488,7 @@ class Othello:
         self.move_thread = threading.Thread(target=self.get_move)
         self.move_thread.daemon = True
         self.make_move_button.config(state=DISABLED)
+        self.stop_move_button.configure(state=NORMAL)
         self.progress_bar.start()
         self.move_thread.start()
         self.master.after(20, self.check_move_thread)
