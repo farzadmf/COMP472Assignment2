@@ -193,13 +193,31 @@ class Othello:
 
         # Status display controls in the footer frame
         self.info_frame = ttk.Frame(self.footer_frame)  # Frame for turn and move labels
-        self.info_frame.pack(fill=X)
+        self.info_frame.pack(fill=X, padx=15)
 
         self.turn_label = ttk.Label(self.info_frame)
-        self.turn_label.pack(side=LEFT, padx=15, pady=3)
+        self.turn_label.config(background='green', foreground='white', text='Current player:',
+                               font=('Arial', 10))
+        self.turn_label.grid(row=0, column=0, ipady=5, sticky='nsew')
+
+        self.turn_color_label = ttk.Label(self.info_frame)
+        self.turn_color_label.config(background='green', foreground='white', text='NONE', width=15,
+                                     font=('Arial', 10, 'bold', 'italic'))
+        self.turn_color_label.grid(row=0, column=1, ipady=5, sticky='nsew')
+
+        self.message_label = ttk.Label(self.info_frame,
+                                       text="Configure the players and click 'Start Game' to start the game",
+                                       font=('Arial', 10))
+        self.message_label.config(background='blue', foreground='yellow', anchor='e')
+        self.message_label.grid(row=0, column=2, ipady=5, sticky='nsew')
+
+        # Adjust column weights for info grid
+        self.info_frame.grid_columnconfigure(0, weight=1)
+        self.info_frame.grid_columnconfigure(1, weight=2)
+        self.info_frame.grid_columnconfigure(2, weight=3)
 
         self.total_moves_label = ttk.Label(self.info_frame)
-        self.total_moves_label.pack(side=RIGHT, padx=15, pady=3)
+        # self.total_moves_label.grid(row=0, column=2, ipady=5)
 
         self.progress_bar = ttk.Progressbar(self.footer_frame, orient=HORIZONTAL)
         self.progress_bar.config(mode='indeterminate')
@@ -270,7 +288,7 @@ class Othello:
                 #   through move history
                 if move in valid_moves and self.current_player != 0 and isinstance(
                         self.players[self.current_player], HumanPlayer) and self.move_history_index == len(
-                    self.all_moves):
+                        self.all_moves):
 
                     cell_label.bind('<ButtonPress-1>', self.make_move_human)
                 else:
@@ -284,10 +302,14 @@ class Othello:
         self.next_move_button.config(
             state=DISABLED if self.move_history_index == all_moves or all_moves == 0 else NORMAL)
 
-        # Update the turn label
-        self.turn_label.config(text='Current Player: {}'.format(
-            'NONE' if self.current_player == 0 else
-            '{} ({})'.format(self.players[self.current_player], Board.get_color_string(self.current_player))))
+        # Update the turn color label
+        if self.current_player == 0:
+            self.turn_color_label.config(text='NONE', foreground='yellow')
+        else:
+            self.turn_color_label.config(
+                text='{} ({})'.format(self.players[self.current_player], Board.get_color_string(self.current_player)),
+                foreground='black' if self.current_player == BLACK else 'white')
+
         self.total_moves_label.config(
             text='Total moves: {}{}'.format(len(self.all_moves),
                                             ' (Current Move: {})'.format(self.move_history_index)
@@ -306,6 +328,10 @@ class Othello:
                                      self.board.is_game_over()
 
                                      else NORMAL)
+
+        # If make-move button is not disabled, display a instruction message
+        if 'disabled' not in self.make_move_button.state():
+            self.message_label.config(text="Select 'Make Move' button to execute next move")
 
     def start_game(self):
         if self.black_player_name.get() == '' or self.white_player_name.get() == '':
