@@ -6,6 +6,8 @@ import threading
 from time import *
 from tkinter import messagebox
 
+PLAYER_FOREGROUND = '#A5201C'
+PLAYER_BACKGROUND = '#74A1E0'
 
 class Othello:
     def __init__(self, master: Tk):
@@ -26,7 +28,10 @@ class Othello:
         self.header_frame.pack(fill=X)
 
         # Frame for configuring players
-        self.players_frame = ttk.LabelFrame(self.header_frame, text='Player Configuration')
+        self.player_config_label = ttk.Label(text='Player Configuration:',
+                                             font=('Arial', 12, 'bold', 'italic', 'underline'),
+                                             foreground=PLAYER_FOREGROUND, background=PLAYER_BACKGROUND)
+        self.players_frame = ttk.LabelFrame(self.header_frame, labelwidget=self.player_config_label)
         self.players_frame.pack(fill=X, padx=5, pady=(5, 0))
 
         # Frame containing buttons
@@ -130,13 +135,17 @@ class Othello:
         self.white_player_type.set(PlayerType.human.value)
 
         # Black player configuration frame and controls
-        self.black_player_frame = ttk.LabelFrame(self.players_frame, text='Black   ')
-        self.black_player_frame.pack(side=LEFT, padx=(20, 10), pady=(0, 10))
-        ttk.Label(self.black_player_frame, text='Name: ').grid(row=0, column=0, sticky='e')
+        self.black_player_label = ttk.Label(text='Black', font=('Arial', 12, 'bold', 'underline'),
+                                            foreground='black', background=PLAYER_BACKGROUND)
+        self.black_player_frame = ttk.LabelFrame(self.players_frame, labelwidget=self.black_player_label)
+        self.black_player_frame.pack(side=LEFT, padx=(20, 10), pady=(5, 10))
+        ttk.Label(self.black_player_frame, text='Name: ',
+                  background=PLAYER_BACKGROUND).grid(row=0, column=0, sticky='e')
         self.black_player_name_entry = ttk.Entry(self.black_player_frame, width=20,
                                                  textvariable=self.black_player_name)
         self.black_player_name_entry.grid(row=0, column=1, padx=5, sticky='w')
-        ttk.Label(self.black_player_frame, text='Type: ').grid(row=1, column=0, sticky='e')
+        ttk.Label(self.black_player_frame, text='Type: ',
+                  background=PLAYER_BACKGROUND).grid(row=1, column=0, sticky='e')
         self.black_player_type_combo = ttk.Combobox(
             self.black_player_frame,
             width=17,
@@ -145,13 +154,17 @@ class Othello:
         self.black_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
 
         # White player configuration frame and controls
-        self.white_player_frame = ttk.LabelFrame(self.players_frame, text='White   ')
-        self.white_player_frame.pack(side=LEFT, padx=(100, 10), pady=(0, 10))
-        ttk.Label(self.white_player_frame, text='Name: ').grid(row=0, column=0, sticky='e')
+        self.white_player_label = ttk.Label(text='White', font=('Arial', 12, 'bold', 'underline'),
+                                            foreground='white', background=PLAYER_BACKGROUND)
+        self.white_player_frame = ttk.LabelFrame(self.players_frame, labelwidget=self.white_player_label)
+        self.white_player_frame.pack(side=LEFT, padx=(100, 10), pady=(5, 10))
+        ttk.Label(self.white_player_frame, text='Name: ',
+                  background=PLAYER_BACKGROUND).grid(row=0, column=0, sticky='e')
         self.white_player_name_entry = ttk.Entry(self.white_player_frame, width=20,
                                                  textvariable=self.white_player_name)
         self.white_player_name_entry.grid(row=0, column=1, padx=5, sticky='w')
-        ttk.Label(self.white_player_frame, text='Type: ').grid(row=1, column=0, sticky='e')
+        ttk.Label(self.white_player_frame, text='Type: ',
+                  background=PLAYER_BACKGROUND).grid(row=1, column=0, sticky='e')
         self.white_player_type_combo = ttk.Combobox(
             self.white_player_frame,
             width=17,
@@ -193,7 +206,7 @@ class Othello:
 
         # Status display controls in the footer frame
         self.info_frame = ttk.Frame(self.footer_frame)  # Frame for turn and move labels
-        self.info_frame.pack(fill=X, padx=15)
+        self.info_frame.pack(fill=X, padx=15, pady=5)
 
         self.turn_label = ttk.Label(self.info_frame)
         self.turn_label.config(background='green', foreground='white', text='Current player:',
@@ -246,7 +259,7 @@ class Othello:
         # ++++++++++++++++++++++++++++++ Styles ++++++++++++++++++++++++++++++++++
         self.style = ttk.Style()
 
-        # Change the background color for the game frame to black
+        # Configure styles
         self.style.configure('GameFrame.TFrame', background='black')
         self.content_frame.config(style='GameFrame.TFrame')
         self.game_frame.config(style='GameFrame.TFrame')
@@ -254,6 +267,19 @@ class Othello:
         self.right_numbers.config(style='GameFrame.TFrame')
         self.top_letters.config(style='GameFrame.TFrame')
         self.bottom_letters.config(style='GameFrame.TFrame')
+
+        self.style.configure('FooterFrame.TFrame', background='gray')
+        self.footer_frame.config(style='FooterFrame.TFrame')
+
+        self.style.configure('HeaderFrame.TFrame', background=PLAYER_BACKGROUND)
+        self.header_frame.configure(style='HeaderFrame.TFrame')
+        self.buttons_frame.configure(style='HeaderFrame.TFrame')
+
+        # TESTING
+        self.players_frame.configure(style='HeaderFrame.TFrame')
+        self.black_player_frame.configure(style='HeaderFrame.TFrame')
+        self.white_player_frame.configure(style='HeaderFrame.TFrame')
+
         self.update()
         # ------------------------------------------------------------------------
 
