@@ -333,7 +333,12 @@ class Othello:
 
         self.current_player = BLACK
 
+        # Enable and disable widgets accordingly
         self.start_game_button.config(state=DISABLED)
+        self.black_player_name_entry.config(state=DISABLED)
+        self.black_player_type_combo.config(state=DISABLED)
+        self.white_player_name_entry.config(state=DISABLED)
+        self.white_player_type_combo.config(state=DISABLED)
         self.reset_button.config(state=NORMAL)
         self.update()
 
@@ -350,8 +355,14 @@ class Othello:
                                    message='Are you sure you want to reset the game?'):
             return
 
+        # Enable and disable widgets accordingly
+        self.black_player_name_entry.config(state=NORMAL)
+        self.black_player_type_combo.config(state=NORMAL)
+        self.white_player_name_entry.config(state=NORMAL)
+        self.white_player_type_combo.config(state=NORMAL)
         self.start_game_button.config(state=NORMAL)
         self.reset_button.config(state=DISABLED)
+
         self.reset_players()
         self.board = Board()
         self.all_moves = []
