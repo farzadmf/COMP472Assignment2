@@ -129,10 +129,14 @@ class Othello:
         self.white_player_name = StringVar()
         self.black_player_type = StringVar()
         self.white_player_type = StringVar()
+        self.black_player_level = IntVar()
+        self.white_player_level = IntVar()
 
-        # Default player types
+        # Default player types and levels
         self.black_player_type.set(PlayerType.human.value)
         self.white_player_type.set(PlayerType.human.value)
+        self.black_player_level.set(1)
+        self.white_player_level.set(1)
 
         # Black player configuration frame and controls
         self.black_player_label = ttk.Label(text='Black', font=('Arial', 12, 'bold', 'underline'),
@@ -151,7 +155,16 @@ class Othello:
             width=17,
             values=list(member.value for _, member in PlayerType.__members__.items()),
             textvariable=self.black_player_type)
+        self.black_player_type_combo.bind('<<ComboboxSelected>>',
+                                          lambda event: self.update_level_spinbox(event, BLACK))
         self.black_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
+        ttk.Label(self.black_player_frame, text='Level: ',
+                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky='e')
+
+        self.black_level_spin = Spinbox(self.black_player_frame, from_=1, to=6, width=18,
+                                        textvariable=self.black_player_level)
+        self.black_level_spin.configure(state=DISABLED)
+        self.black_level_spin.grid(row=2, column=1)
 
         # White player configuration frame and controls
         self.white_player_label = ttk.Label(text='White', font=('Arial', 12, 'bold', 'underline'),
@@ -170,7 +183,16 @@ class Othello:
             width=17,
             values=list(member.value for _, member in PlayerType.__members__.items()),
             textvariable=self.white_player_type)
+        self.white_player_type_combo.bind('<<ComboboxSelected>>',
+                                          lambda event: self.update_level_spinbox(event, WHITE))
         self.white_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
+        ttk.Label(self.white_player_frame, text='Level: ',
+                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky='e')
+
+        self.white_level_spin = Spinbox(self.white_player_frame, from_=1, to=6, width=18,
+                                        textvariable=self.white_player_level)
+        self.white_level_spin.configure(state=DISABLED)
+        self.white_level_spin.grid(row=2, column=1)
 
         # Update players button
         self.start_game_button = ttk.Button(self.players_frame, text='Start Game',
@@ -274,8 +296,6 @@ class Othello:
         self.style.configure('HeaderFrame.TFrame', background=PLAYER_BACKGROUND)
         self.header_frame.configure(style='HeaderFrame.TFrame')
         self.buttons_frame.configure(style='HeaderFrame.TFrame')
-
-        # TESTING
         self.players_frame.configure(style='HeaderFrame.TFrame')
         self.black_player_frame.configure(style='HeaderFrame.TFrame')
         self.white_player_frame.configure(style='HeaderFrame.TFrame')
@@ -394,6 +414,12 @@ class Othello:
         self.reset_button.config(state=NORMAL)
         self.update()
 
+    def update_level_spinbox(self, event, color):
+        if color == BLACK:
+            self.black_level_spin.configure(state=DISABLED if event.widget.get() == 'Human' else NORMAL)
+        elif color == WHITE:
+            self.white_level_spin.configure(state=DISABLED if event.widget.get() == 'Human' else NORMAL)
+
     def reset_players(self):
         self.black_player_type.set(PlayerType.human.value)
         self.white_player_type.set(PlayerType.human.value)
@@ -414,6 +440,8 @@ class Othello:
         self.white_player_type_combo.config(state=NORMAL)
         self.start_game_button.config(state=NORMAL)
         self.reset_button.config(state=DISABLED)
+        self.white_level_spin.configure(state=DISABLED)
+        self.black_level_spin.configure(state=DISABLED)
 
         self.reset_players()
         self.board = Board()
@@ -460,7 +488,8 @@ class Othello:
 
     def get_move(self):
         current_player = self.players[self.current_player]
-        next_move, value = current_player.get_best_move(self.board, 2)
+        player_level = self.black_player_level.get() if self.current_player == BLACK else self.white_player_level.get()
+        next_move, value = current_player.get_best_move(self.board, player_level)
         self.last_move = next_move
         self.execute_move()
 
