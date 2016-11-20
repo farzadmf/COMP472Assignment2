@@ -9,6 +9,7 @@ from tkinter import messagebox
 PLAYER_FOREGROUND = '#A5201C'
 PLAYER_BACKGROUND = '#74A1E0'
 
+
 class Othello:
     def __init__(self, master: Tk):
 
@@ -477,7 +478,6 @@ class Othello:
             self.master.after(20, self.check_move_thread)
         else:
             self.progress_bar.stop()
-            self.stop_move_button.configure(state=DISABLED)
 
     def make_move_human(self, event):
         next_move = (event.widget.row, event.widget.column)
@@ -488,7 +488,6 @@ class Othello:
         self.move_thread = threading.Thread(target=self.get_move)
         self.move_thread.daemon = True
         self.make_move_button.config(state=DISABLED)
-        self.stop_move_button.configure(state=NORMAL)
         self.progress_bar.start()
         self.move_thread.start()
         self.master.after(20, self.check_move_thread)
