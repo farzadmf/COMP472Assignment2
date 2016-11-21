@@ -6,6 +6,7 @@ from mini_max import AgentType, AlphaBeta
 class PlayerType(Enum):
     human = 'Human'
     greedy = 'Greedy'
+    composite = 'Composite'
 
 
 class Player:
@@ -14,7 +15,8 @@ class Player:
         self.name = name
 
     def get_best_move(self, board: Board, max_level):
-        pass
+        agent = AlphaBeta(max_level, self.player_type)
+        return agent.get_best_action_and_value(board)
 
     def __str__(self):
         return self.name
@@ -41,9 +43,15 @@ class GreedyPlayer(Player):
         super().__init__(name)
         self.player_type = AgentType.greedy
 
-    def get_best_move(self, board: Board, max_level):
-        agent = AlphaBeta(max_level, self.player_type)
-        return agent.get_best_action_and_value(board)
-
     def get_type_name(self):
         return 'Greedy'
+
+
+class CompositePlayer(Player):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.player_type = AgentType.composite
+
+    def get_type_name(self):
+        return 'Composite'

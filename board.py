@@ -23,6 +23,7 @@ from mini_max import AgentType
 
 BLACK = -1
 WHITE = 1
+EMPTY = 0
 
 
 class Board:
@@ -34,7 +35,7 @@ class Board:
         # Create the empty board array
         self.__pieces = [None] * 8
         for i in range(8):
-            self.__pieces[i] = [0] * 8
+            self.__pieces[i] = [EMPTY] * 8
 
         # Set up the initial 4 pieces
         self.__pieces[3][4] = WHITE
@@ -50,7 +51,8 @@ class Board:
 
         # Configure heuristic functions for different agent types
         self.heuristics = dict()
-        self.heuristics[AgentType.greedy] = self.get_current_player_count
+        self.heuristics[AgentType.greedy] = self.get_count
+        self.heuristics[AgentType.composite] = self.composite_heuristic
 
     def clone(self):
         """
@@ -361,8 +363,140 @@ class Board:
 
     # ################# Functions used for heuristics ##########################
 
-    def get_current_player_count(self):
+    def get_count(self):
         return self.count(self.__turn) - self.count(-self.__turn)
+
+    # Code for heuristic from here: https://kartikkukreja.wordpress.com/2013/03/30/heuristic-function-for-reversiothello/
+    def composite_heuristic(self):
+        v = [[None] * 8] * 8
+        v[0] = [20, -3, 11, 8, 8, 11, -3, 20]
+        v[1] = [-3, -7, -4, 1, 1, -4, -7, -3]
+        v[2] = [11, -4, 2, 2, 2, 2, -4, 11]
+        v[3] = [8, 1, 2, -3, -3, 2, 1, 8]
+        v[4] = [8, 1, 2, -3, -3, 2, 1, 8]
+        v[5] = [11, -4, 2, 2, 2, 2, -4, 11]
+        v[6] = [-3, -7, -4, 1, 1, -4, -7, -3]
+        v[7] = [20, -3, 11, 8, 8, 11, -3, 20]
+
+        my_tiles = 0
+        opponent_tiles = 0
+        my_front_tiles = 0
+        opponent_front_tiles = 0
+        p = 0.0
+        c = 0.0
+        l = 0.0
+        m = 0.0
+        f = 0.0
+        d = 0.0
+
+        for i in range(8):
+            for j in range(8):
+                if self[i][j] == self.__turn:
+                    d += v[i][j]
+                    my_tiles += 1
+                elif self[i][j] == -self.__turn:
+                    d -= v[i][j]
+                    opponent_tiles += 1
+
+                if self[i][j] != EMPTY:
+                    for direction in self.__directions:
+                        x_neighbor, y_neighbor = map(sum, zip((i, j), direction))
+                        if 0 <= x_neighbor < 8 and 0 <= y_neighbor < 8 and self[x_neighbor][y_neighbor] == EMPTY:
+                            if self[i][j] == self.__turn:
+                                my_tiles += 1
+                            elif self[i][j] == -self.__turn:
+                                opponent_tiles += 1
+                            break
+
+        if my_tiles > opponent_tiles:
+            p = (100.0 * my_tiles) / (my_tiles + opponent_tiles)
+        elif my_tiles < opponent_tiles:
+            p = -(100.0 * my_tiles) / (my_tiles + opponent_tiles)
+        else:
+            p = 0
+
+        if my_front_tiles > opponent_front_tiles:
+            f = -(100.0 * my_front_tiles) / (my_front_tiles + opponent_front_tiles)
+        elif my_front_tiles < opponent_front_tiles:
+            f = (100.0 * my_front_tiles) / (my_front_tiles + opponent_front_tiles)
+        else:
+            f = 0
+
+        # Corner occupancy
+        my_tiles = 0
+        opponent_tiles = 0
+
+        if self[0][0] == EMPTY:
+            if self[0][1] == self.__turn:
+                my_tiles += 1
+            elif self[0][1] == -self.__turn:
+                opponent_tiles += 1
+            if self[1][1] == self.__turn:
+                my_tiles += 1
+            elif self[1][1] == -self.__turn:
+                opponent_tiles += 1
+            if self[1][0] == self.__turn:
+                my_tiles += 1
+            elif self[1][0] == -self.__turn:
+                opponent_tiles += 1
+
+        if self[0][7] == EMPTY:
+            if self[0][6] == self.__turn:
+                my_tiles += 1
+            elif self[0][6] == -self.__turn:
+                opponent_tiles += 1
+            if self[1][6] == self.__turn:
+                my_tiles += 1
+            elif self[1][6] == -self.__turn:
+                opponent_tiles += 1
+            if self[1][7] == self.__turn:
+                my_tiles += 1
+            elif self[1][7] == -self.__turn:
+                opponent_tiles += 1
+
+        if self[7][0] == EMPTY:
+            if self[7][1] == self.__turn:
+                my_tiles += 1
+            elif self[7][1] == -self.__turn:
+                opponent_tiles += 1
+            if self[6][1] == self.__turn:
+                my_tiles += 1
+            elif self[6][1] == -self.__turn:
+                opponent_tiles += 1
+            if self[7][6] == self.__turn:
+                my_tiles += 1
+            elif self[7][6] == -self.__turn:
+                opponent_tiles += 1
+
+        if self[7][7] == EMPTY:
+            if self[6][7] == self.__turn:
+                my_tiles += 1
+            elif self[6][7] == -self.__turn:
+                opponent_tiles += 1
+            if self[6][6] == self.__turn:
+                my_tiles += 1
+            elif self[6][6] == -self.__turn:
+                opponent_tiles += 1
+            if self[7][6] == self.__turn:
+                my_tiles += 1
+            elif self[7][6] == -self.__turn:
+                opponent_tiles += 1
+
+        l = -12.5 * (my_tiles - opponent_tiles)
+
+        # Mobility
+        my_tiles = len(self.get_legal_moves(self.__turn))
+        opponent_tiles = len(self.get_legal_moves(-self.__turn))
+
+        if my_tiles > opponent_tiles:
+            m = (100.0 * my_tiles) / (my_tiles + opponent_tiles)
+        elif my_tiles < opponent_tiles:
+            m = -(100.0 * my_tiles) / (my_tiles + opponent_tiles)
+        else:
+            m = 0
+
+        # Final weighted score
+        return (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m) + (74.396 * f) + (10 * d)
 
     # ##########################################################################
 

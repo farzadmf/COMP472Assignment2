@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-from player import PlayerType, HumanPlayer, GreedyPlayer
+from player import PlayerType, HumanPlayer, GreedyPlayer, CompositePlayer
 from board import Board, BLACK, WHITE
 import threading
 from time import *
@@ -403,11 +403,15 @@ class Othello:
             self.players[BLACK] = HumanPlayer(black_player_name)
         elif black_player_type == PlayerType.greedy:
             self.players[BLACK] = GreedyPlayer(black_player_name)
+        elif black_player_type == PlayerType.composite:
+            self.players[BLACK] = CompositePlayer(black_player_name)
 
         if white_player_type == PlayerType.human:
             self.players[WHITE] = HumanPlayer(white_player_name)
         elif white_player_type == PlayerType.greedy:
             self.players[WHITE] = GreedyPlayer(white_player_name)
+        elif white_player_type == PlayerType.composite:
+            self.players[WHITE] = CompositePlayer(white_player_name)
 
         self.current_player = BLACK
 

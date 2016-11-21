@@ -1,4 +1,4 @@
-from player import Player, PlayerType, HumanPlayer, GreedyPlayer
+from player import Player, GreedyPlayer, CompositePlayer
 from board import Board, BLACK, WHITE
 import time
 
@@ -13,21 +13,28 @@ class OthelloRunner:
         self.winner = 0
 
         self.wins = dict()
-        self.wins[BLACK] = 0
-        self.wins[WHITE] = 0
         self.ties = 0
 
     def play_series(self, black_player: Player, white_player: Player, min_level: int, max_level: int):
+        self.wins[BLACK] = 0
+        self.wins[WHITE] = 0
+
         separator_length = 87
-        header = "| Running games using {} with levels from '{}' to '{}' |"
 
         if type(black_player) == type(white_player):
-            header = header.format('two {} players'.format(black_player.get_type_name()), min_level, max_level)
+            header = "| Running games using two {} players with levels from '{}' to '{}' |".format(
+                black_player.get_type_name(), min_level, max_level)
+            header_length = len(header) - 2
         else:
-            header = header.format('one {} player and one {} player'.format(
-                black_player.get_type_name(), white_player.get_type_name()), min_level, max_level)
+            header1 = "| Running games using {} with |"
+            header1 = header1.format('one {} player (BLACK) and one {} player (WHITE)'.format(
+                black_player.get_type_name(), white_player.get_type_name()))
+            header2 = "|          levels from '{}' to '{}'".format(min_level, max_level)
+            header2 += ' ' * (len(header1) - len(header2) - 1) + '|'
+            header = '{}\n{}'.format(header1, header2)
+            header_length = len(header1) - 2
 
-        header_line = '+{}+'.format('-' * (len(header) - 2))
+        header_line = '+{}+'.format('-' * header_length)
         separator = '=' * separator_length
         print('\n{}\n'.format(separator))
         print(header_line)
@@ -71,14 +78,15 @@ class OthelloRunner:
             self.winner = WHITE
 
         if self.scores[BLACK] == self.scores[WHITE]:
-            print(' The game was a tie', end='')
+            print('{:43}'.format(' The game was a tie'), end='')
         else:
-            print(" '{}' defeats '{}'. Score: {:2} to {:2}".format(
+            print('{:43}'.format(" '{}' defeats '{}'. Score: {:2} to {:2}".format(
                 Board.get_color_string(self.winner), Board.get_color_string(-self.winner),
                 self.scores[self.winner], self.scores[-self.winner]
-            ), end='')
+            )), end='')
 
-        print(' (time: {:6.3}s)'.format(end_time - start_time))
+        elapsed_time = end_time - start_time
+        print(' (time: {:7.3}s)'.format(elapsed_time))
 
     def print_final_results(self):
         print('\nFinal Results:')
@@ -91,7 +99,20 @@ class OthelloRunner:
 if __name__ == '__main__':
     tester = OthelloRunner()
 
+    minimum = 1
+    maximum = 2
+
     tester.play_series(black_player=GreedyPlayer('black'),
                        white_player=GreedyPlayer('white'),
-                       min_level=1,
-                       max_level=2)
+                       min_level=minimum,
+                       max_level=maximum)
+
+    tester.play_series(black_player=CompositePlayer('black'),
+                       white_player=GreedyPlayer('white'),
+                       min_level=minimum,
+                       max_level=maximum)
+
+    tester.play_series(black_player=CompositePlayer('black'),
+                       white_player=CompositePlayer('white'),
+                       min_level=minimum,
+                       max_level=maximum)
