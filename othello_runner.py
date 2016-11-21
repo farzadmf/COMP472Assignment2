@@ -19,7 +19,7 @@ class OthelloRunner:
         self.wins[BLACK] = 0
         self.wins[WHITE] = 0
 
-        separator_length = 87
+        separator_length = 89
 
         if type(black_player) == type(white_player):
             header = "| Running games using two {} players with levels from '{}' to '{}' |".format(
@@ -100,17 +100,17 @@ if __name__ == '__main__':
     tester = OthelloRunner()
 
     minimum = 1
-    maximum = 2
+    maximum = 4
 
-    tester.play_series(black_player=GreedyPlayer('black'),
-                       white_player=GreedyPlayer('white'),
-                       min_level=minimum,
-                       max_level=maximum)
+    # tester.play_series(black_player=GreedyPlayer('black'),
+    #                    white_player=GreedyPlayer('white'),
+    #                    min_level=minimum,
+    #                    max_level=maximum)
 
-    tester.play_series(black_player=CompositePlayer('black'),
-                       white_player=GreedyPlayer('white'),
-                       min_level=minimum,
-                       max_level=maximum)
+    # tester.play_series(black_player=CompositePlayer('black'),
+    #                    white_player=GreedyPlayer('white'),
+    #                    min_level=minimum,
+    #                    max_level=maximum)
 
     tester.play_series(black_player=CompositePlayer('black'),
                        white_player=CompositePlayer('white'),

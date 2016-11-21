@@ -426,6 +426,32 @@ class Board:
         my_tiles = 0
         opponent_tiles = 0
 
+        if self[0][0] == self.__turn:
+            my_tiles += 1
+        elif self[0][0] == -self.__turn:
+            opponent_tiles += 1
+
+        if self[0][7] == self.__turn:
+            my_tiles += 1
+        elif self[0][7] == -self.__turn:
+            opponent_tiles += 1
+
+        if self[7][0] == self.__turn:
+            my_tiles += 1
+        elif self[7][0] == -self.__turn:
+            opponent_tiles += 1
+
+        if self[7][7] == self.__turn:
+            my_tiles += 1
+        elif self[7][7] == -self.__turn:
+            opponent_tiles += 1
+
+        c = 25 * (my_tiles - opponent_tiles)
+
+        # Corner closeness
+        my_tiles = 0
+        opponent_tiles = 0
+
         if self[0][0] == EMPTY:
             if self[0][1] == self.__turn:
                 my_tiles += 1
@@ -463,9 +489,9 @@ class Board:
                 my_tiles += 1
             elif self[6][1] == -self.__turn:
                 opponent_tiles += 1
-            if self[7][6] == self.__turn:
+            if self[6][0] == self.__turn:
                 my_tiles += 1
-            elif self[7][6] == -self.__turn:
+            elif self[6][0] == -self.__turn:
                 opponent_tiles += 1
 
         if self[7][7] == EMPTY:
