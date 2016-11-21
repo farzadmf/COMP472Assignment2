@@ -249,7 +249,7 @@ class Othello:
         self.message_label = ttk.Label(self.info_frame,
                                        text="Configure the players and click 'Start Game' to start the game",
                                        font=('Arial', 10))
-        self.message_label.config(background='blue', foreground='yellow', anchor='e')
+        self.message_label.config(background='blue', foreground='yellow', anchor='e', width=50)
         self.message_label.grid(row=0, column=2, ipady=5, sticky='nsew')
 
         # Adjust column weights for info grid
@@ -258,7 +258,7 @@ class Othello:
         self.info_frame.grid_columnconfigure(2, weight=3)
 
         self.total_moves_label = ttk.Label(self.info_frame)
-        # self.total_moves_label.grid(row=0, column=2, ipady=5)
+        #self.total_moves_label.grid(row=0, column=2, ipady=5)
 
         self.progress_bar = ttk.Progressbar(self.footer_frame, orient=HORIZONTAL)
         self.progress_bar.config(mode='indeterminate')
@@ -381,9 +381,13 @@ class Othello:
 
                                      else NORMAL)
 
-        # If make-move button is not disabled, display a instruction message
+        # Display an instruction message based on make-move button's state:
+        #   *) If it's disabled (and the game has started), player should click on one of the legal moves
+        #   *) It it's enabled, we should click on it to make the computer move
         if 'disabled' not in self.make_move_button.state():
             self.message_label.config(text="Select 'Make Move' button to execute next move")
+        elif len(self.players) > 0:
+            self.message_label.config(text='Select your move by clicking one of the highlighted legal moves')
 
     def start_game(self):
         if self.black_player_name.get() == '' or self.white_player_name.get() == '':
