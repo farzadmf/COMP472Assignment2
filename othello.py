@@ -8,6 +8,7 @@ from tkinter import messagebox
 
 PLAYER_FOREGROUND = '#A5201C'
 PLAYER_BACKGROUND = '#74A1E0'
+DISABLED_COLOR = 'yellow3'
 
 
 class Othello:
@@ -148,62 +149,65 @@ class Othello:
         self.black_player_label = ttk.Label(text='Black', font=('Arial', 12, 'bold', 'underline'),
                                             foreground='black', background=PLAYER_BACKGROUND)
         self.black_player_frame = ttk.LabelFrame(self.players_frame, labelwidget=self.black_player_label)
-        self.black_player_frame.pack(side=LEFT, padx=(20, 10), pady=(5, 10))
+        self.black_player_frame.grid(row=0, column=0, sticky=W)
         ttk.Label(self.black_player_frame, text='Name: ',
                   background=PLAYER_BACKGROUND).grid(row=0, column=0, sticky='e')
-        self.black_player_name_entry = ttk.Entry(self.black_player_frame, width=20,
+        self.black_player_name_entry = ttk.Entry(self.black_player_frame,
                                                  textvariable=self.black_player_name)
-        self.black_player_name_entry.grid(row=0, column=1, padx=5, sticky='w')
+        self.black_player_name_entry.grid(row=0, column=1, padx=5, sticky=N+S+E+W)
         ttk.Label(self.black_player_frame, text='Type: ',
                   background=PLAYER_BACKGROUND).grid(row=1, column=0, sticky='e')
         self.black_player_type_combo = ttk.Combobox(
             self.black_player_frame,
-            width=17,
             values=list(member.value for _, member in PlayerType.__members__.items()),
             textvariable=self.black_player_type)
         self.black_player_type_combo.bind('<<ComboboxSelected>>',
                                           lambda event: self.update_level_spinbox(event, BLACK))
         self.black_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
         ttk.Label(self.black_player_frame, text='Level: ',
-                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky='e')
+                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky=N+S+E+W)
 
         self.black_level_spin = Spinbox(self.black_player_frame, from_=1, to=6, width=18,
                                         textvariable=self.black_player_level)
-        self.black_level_spin.configure(state=DISABLED)
-        self.black_level_spin.grid(row=2, column=1)
+        self.black_level_spin.configure(state=DISABLED, disabledbackground=DISABLED_COLOR)
+        self.black_level_spin.grid(row=2, column=1, sticky='nsew', padx=5)
 
         # White player configuration frame and controls
         self.white_player_label = ttk.Label(text='White', font=('Arial', 12, 'bold', 'underline'),
                                             foreground='white', background=PLAYER_BACKGROUND)
         self.white_player_frame = ttk.LabelFrame(self.players_frame, labelwidget=self.white_player_label)
-        self.white_player_frame.pack(side=LEFT, padx=(100, 10), pady=(5, 10))
+        self.white_player_frame.grid(row=0, column=1, sticky=W)
         ttk.Label(self.white_player_frame, text='Name: ',
                   background=PLAYER_BACKGROUND).grid(row=0, column=0, sticky='e')
-        self.white_player_name_entry = ttk.Entry(self.white_player_frame, width=20,
+        self.white_player_name_entry = ttk.Entry(self.white_player_frame,
                                                  textvariable=self.white_player_name)
-        self.white_player_name_entry.grid(row=0, column=1, padx=5, sticky='w')
+        self.white_player_name_entry.grid(row=0, column=1, padx=5, sticky='nsew')
         ttk.Label(self.white_player_frame, text='Type: ',
                   background=PLAYER_BACKGROUND).grid(row=1, column=0, sticky='e')
         self.white_player_type_combo = ttk.Combobox(
             self.white_player_frame,
-            width=17,
             values=list(member.value for _, member in PlayerType.__members__.items()),
             textvariable=self.white_player_type)
         self.white_player_type_combo.bind('<<ComboboxSelected>>',
                                           lambda event: self.update_level_spinbox(event, WHITE))
         self.white_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
         ttk.Label(self.white_player_frame, text='Level: ',
-                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky='e')
+                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky='nsew')
 
         self.white_level_spin = Spinbox(self.white_player_frame, from_=1, to=6, width=18,
                                         textvariable=self.white_player_level)
-        self.white_level_spin.configure(state=DISABLED)
-        self.white_level_spin.grid(row=2, column=1)
+        self.white_level_spin.configure(state=DISABLED, disabledbackground=DISABLED_COLOR)
+        self.white_level_spin.grid(row=2, column=1, sticky='nsew', padx=5)
 
         # Update players button
         self.start_game_button = ttk.Button(self.players_frame, text='Start Game',
                                             command=self.start_game)
-        self.start_game_button.pack(side=LEFT, padx=(100, 0))
+        self.start_game_button.grid(row=0, column=2)
+
+        # Configure column weights on the parent
+        self.players_frame.grid_columnconfigure(0, weight=1)
+        self.players_frame.grid_columnconfigure(1, weight=1)
+        self.players_frame.grid_columnconfigure(2, weight=1)
 
         # Set up the players
         self.players = dict()
