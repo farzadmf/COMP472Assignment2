@@ -13,10 +13,14 @@ class Player:
 
     def __init__(self, name):
         self.name = name
+        self.agent = None  # type: AlphaBeta
 
-    def get_best_move(self, board: Board, max_level):
-        agent = AlphaBeta(max_level, self.player_type)
-        return agent.get_best_action_and_value(board)
+    def get_best_move(self, board: Board, max_level, time_out):
+        self.agent = AlphaBeta(max_level, self.player_type)
+        return self.agent.get_best_action_and_value(board, time_out)
+
+    def stop_move(self):
+        self.agent.stop = True
 
     def __str__(self):
         return self.name
@@ -30,7 +34,7 @@ class Player:
 
 class HumanPlayer(Player):
 
-    def get_best_move(self, board: Board, max_level):
+    def get_best_move(self, board: Board, max_level, time_out):
         return None, 0
 
     def get_type_name(self):

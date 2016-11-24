@@ -3,6 +3,7 @@ from tkinter import ttk
 from player import PlayerType, HumanPlayer, GreedyPlayer, CompositePlayer
 from board import Board, BLACK, WHITE
 import threading
+from mini_max import TimeOutException
 from time import *
 from tkinter import messagebox
 
@@ -138,71 +139,115 @@ class Othello:
         self.white_player_type = StringVar()
         self.black_player_level = IntVar()
         self.white_player_level = IntVar()
+        self.time_out_value = IntVar()
 
         # Default player types and levels
         self.black_player_type.set(PlayerType.human.value)
         self.white_player_type.set(PlayerType.human.value)
         self.black_player_level.set(1)
         self.white_player_level.set(1)
+        self.time_out_value.set(20)
 
-        # Black player configuration frame and controls
-        self.black_player_label = ttk.Label(text='Black', font=('Arial', 12, 'bold', 'underline'),
-                                            foreground='black', background=PLAYER_BACKGROUND)
-        self.black_player_frame = ttk.LabelFrame(self.players_frame, labelwidget=self.black_player_label)
-        self.black_player_frame.grid(row=0, column=0, sticky=W)
+        # +++++++++++++ Black player configuration frame and controls +++++++++++++
+        # Container grid
+        self.black_player_label = ttk.Label(
+            text='Black',
+            font=('Arial', 12, 'bold', 'underline'),
+            foreground='black',
+            background=PLAYER_BACKGROUND)
+        self.black_player_frame = ttk.LabelFrame(
+            self.players_frame,
+            labelwidget=self.black_player_label)
+        self.black_player_frame.grid(row=0, column=0, sticky=W, rowspan=3)
+
+        # Label and entry for the name
         ttk.Label(self.black_player_frame, text='Name: ',
                   background=PLAYER_BACKGROUND).grid(row=0, column=0, sticky='e')
-        self.black_player_name_entry = ttk.Entry(self.black_player_frame,
-                                                 textvariable=self.black_player_name)
+        self.black_player_name_entry = ttk.Entry(
+            self.black_player_frame,
+            textvariable=self.black_player_name)
         self.black_player_name_entry.grid(row=0, column=1, padx=5, sticky=N+S+E+W)
+
+        # Label and combobox for the type
         ttk.Label(self.black_player_frame, text='Type: ',
                   background=PLAYER_BACKGROUND).grid(row=1, column=0, sticky='e')
         self.black_player_type_combo = ttk.Combobox(
             self.black_player_frame,
             values=list(member.value for _, member in PlayerType.__members__.items()),
             textvariable=self.black_player_type)
-        self.black_player_type_combo.bind('<<ComboboxSelected>>',
-                                          lambda event: self.update_level_spinbox(event, BLACK))
+        self.black_player_type_combo.bind(
+            '<<ComboboxSelected>>', lambda event: self.update_level_spinbox(event, BLACK))
         self.black_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
+
+        # Label and spin-box for the level
         ttk.Label(self.black_player_frame, text='Level: ',
                   background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky=N+S+E+W)
 
-        self.black_level_spin = Spinbox(self.black_player_frame, from_=1, to=6, width=18,
-                                        textvariable=self.black_player_level)
+        self.black_level_spin = Spinbox(
+            self.black_player_frame,
+            from_=1, to=6,
+            width=18,
+            textvariable=self.black_player_level)
         self.black_level_spin.configure(state=DISABLED, disabledbackground=DISABLED_COLOR)
         self.black_level_spin.grid(row=2, column=1, sticky='nsew', padx=5)
+        # -------------------------------------------------------------------------
 
-        # White player configuration frame and controls
-        self.white_player_label = ttk.Label(text='White', font=('Arial', 12, 'bold', 'underline'),
-                                            foreground='white', background=PLAYER_BACKGROUND)
-        self.white_player_frame = ttk.LabelFrame(self.players_frame, labelwidget=self.white_player_label)
-        self.white_player_frame.grid(row=0, column=1, sticky=W)
+        # +++++++++++++ White player configuration frame and controls +++++++++++++
+        # Container grid
+        self.white_player_label = ttk.Label(
+            text='White',
+            font=('Arial', 12, 'bold', 'underline'),
+            foreground='white',
+            background=PLAYER_BACKGROUND)
+        self.white_player_frame = ttk.LabelFrame(
+            self.players_frame,
+            labelwidget=self.white_player_label)
+        self.white_player_frame.grid(row=0, column=1, sticky=W, rowspan=3)
+
+        # Label and entry for the name
         ttk.Label(self.white_player_frame, text='Name: ',
                   background=PLAYER_BACKGROUND).grid(row=0, column=0, sticky='e')
-        self.white_player_name_entry = ttk.Entry(self.white_player_frame,
-                                                 textvariable=self.white_player_name)
+        self.white_player_name_entry = ttk.Entry(
+            self.white_player_frame,
+            textvariable=self.white_player_name)
         self.white_player_name_entry.grid(row=0, column=1, padx=5, sticky='nsew')
+
+        # Label and combobox for the type
         ttk.Label(self.white_player_frame, text='Type: ',
                   background=PLAYER_BACKGROUND).grid(row=1, column=0, sticky='e')
         self.white_player_type_combo = ttk.Combobox(
             self.white_player_frame,
             values=list(member.value for _, member in PlayerType.__members__.items()),
             textvariable=self.white_player_type)
-        self.white_player_type_combo.bind('<<ComboboxSelected>>',
-                                          lambda event: self.update_level_spinbox(event, WHITE))
+        self.white_player_type_combo.bind(
+            '<<ComboboxSelected>>', lambda event: self.update_level_spinbox(event, WHITE))
         self.white_player_type_combo.grid(row=1, column=1, padx=5, sticky='w')
+
+        # Label and spin-box for the level
         ttk.Label(self.white_player_frame, text='Level: ',
                   background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky='nsew')
-
-        self.white_level_spin = Spinbox(self.white_player_frame, from_=1, to=6, width=18,
-                                        textvariable=self.white_player_level)
+        self.white_level_spin = Spinbox(
+            self.white_player_frame,
+            from_=1, to=6,
+            width=18,
+            textvariable=self.white_player_level)
         self.white_level_spin.configure(state=DISABLED, disabledbackground=DISABLED_COLOR)
         self.white_level_spin.grid(row=2, column=1, sticky='nsew', padx=5)
+        # -------------------------------------------------------------------------
 
-        # Update players button
+        # Time out label and spin-box
+        ttk.Label(self.players_frame, text='Move Time Out (seconds):',
+                  background=PLAYER_BACKGROUND).grid(row=0, column=2, sticky=W)
+        self.time_out_spin = Spinbox(
+            self.players_frame,
+            from_=1, to=60,
+            textvariable=self.time_out_value)
+        self.time_out_spin.grid(row=1, column=2, sticky='ew')
+
+        # Start game button
         self.start_game_button = ttk.Button(self.players_frame, text='Start Game',
                                             command=self.start_game)
-        self.start_game_button.grid(row=0, column=2)
+        self.start_game_button.grid(row=2, column=2, sticky='ew')
 
         # Configure column weights on the parent
         self.players_frame.grid_columnconfigure(0, weight=1)
@@ -507,7 +552,13 @@ class Othello:
     def get_move(self):
         current_player = self.players[self.current_player]
         player_level = self.black_player_level.get() if self.current_player == BLACK else self.white_player_level.get()
-        next_move, value = current_player.get_best_move(self.board, player_level)
+        next_move = None
+
+        try:
+            next_move, value = current_player.get_best_move(self.board, player_level, self.time_out_value.get())
+        except TimeOutException:
+            print("player passed")
+
         self.last_move = next_move
         self.execute_move()
 
