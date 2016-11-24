@@ -18,15 +18,20 @@ class AlphaBeta:
         self.agent_type = agent_type
         self.start_time = 0
         self.time_out = 0
+        self.raise_exception = True
 
-    def get_best_action_and_value(self, board, time_out):
+    def get_best_action_and_value(self, board, time_out, raise_exception=True):
         self.start_time = time.time()
         self.time_out = time_out
+        self.raise_exception = raise_exception
         return self.maxi_min(board, 0, float("-inf"), float("inf"))
 
     def maxi_min(self, board, depth: int, alpha, beta):
         if time.time() - self.start_time > self.time_out:
-            raise TimeOutException()
+            if self.raise_exception:
+                raise TimeOutException()
+            else:
+                return None, 0
 
         if depth == self._max_depth or board.is_game_over():
             evaluation_function = board.heuristics[self.agent_type]
@@ -48,7 +53,10 @@ class AlphaBeta:
 
     def mini_max(self, board, depth: int, alpha, beta):
         if time.time() - self.start_time > self.time_out:
-            raise TimeOutException()
+            if self.raise_exception:
+                raise TimeOutException()
+            else:
+                return None, 0
 
         if depth == self._max_depth or board.is_game_over():
             evaluation_function = board.heuristics[self.agent_type]

@@ -14,10 +14,12 @@ class OthelloRunner:
 
         self.wins = dict()
         self.ties = 0
+        self.time_out = 0
 
-    def play_series(self, black_player: Player, white_player: Player, min_level: int, max_level: int):
+    def play_series(self, black_player: Player, white_player: Player, min_level: int, max_level: int, time_out: int):
         self.wins[BLACK] = 0
         self.wins[WHITE] = 0
+        self.time_out = time_out
 
         separator_length = 89
 
@@ -62,7 +64,10 @@ class OthelloRunner:
             # print(Board.get_color_string(self.board.get_turn()))
             # input()
             current_player = self.players[self.board.get_turn()]  # type: Player
-            next_move, _ = current_player.get_best_move(self.board, level)
+
+            next_move, _ = current_player.get_best_move(self.board, level, self.time_out,
+                                                        raise_exception=False)
+
             self.board = self.board.execute_move(next_move)
         end_time = time.time()
 
@@ -100,19 +105,23 @@ if __name__ == '__main__':
     tester = OthelloRunner()
 
     minimum = 1
-    maximum = 4
+    maximum = 5
+    time_out_value = 1
 
-    # tester.play_series(black_player=GreedyPlayer('black'),
-    #                    white_player=GreedyPlayer('white'),
-    #                    min_level=minimum,
-    #                    max_level=maximum)
+    tester.play_series(black_player=GreedyPlayer('black'),
+                       white_player=GreedyPlayer('white'),
+                       min_level=minimum,
+                       max_level=maximum,
+                       time_out=time_out_value)
 
-    # tester.play_series(black_player=CompositePlayer('black'),
-    #                    white_player=GreedyPlayer('white'),
-    #                    min_level=minimum,
-    #                    max_level=maximum)
+    tester.play_series(black_player=CompositePlayer('black'),
+                       white_player=GreedyPlayer('white'),
+                       min_level=minimum,
+                       max_level=maximum,
+                       time_out=time_out_value)
 
     tester.play_series(black_player=CompositePlayer('black'),
                        white_player=CompositePlayer('white'),
                        min_level=minimum,
-                       max_level=maximum)
+                       max_level=maximum,
+                       time_out=1)
