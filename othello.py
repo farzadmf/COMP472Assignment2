@@ -26,8 +26,10 @@ class Othello:
         self.move_history_index = 0
 
         # ++++++++++++++++++++++++++++++ Frames ++++++++++++++++++++++++++++++++++
+
+        # +++++++++++++++++++++++++++ Header Frame +++++++++++++++++++++++++++++++
         # Header frame
-        self.header_frame = ttk.Frame(master, name='header_frame')
+        self.header_frame = ttk.Frame(self.master, name='header_frame')
         self.header_frame.pack(fill=X)
 
         # Frame for configuring players
@@ -42,9 +44,11 @@ class Othello:
         # Frame containing buttons
         self.buttons_frame = ttk.Frame(self.header_frame, name='buttons_frame')
         self.buttons_frame.pack(fill=X, pady=5)
+        # ------------------------------------------------------------------------
 
+        # ++++++++++++++++++++++++++ Content Frame +++++++++++++++++++++++++++++++
         # Content frame containing game and table
-        self.content_frame = ttk.Frame(master, name='content_frame')
+        self.content_frame = ttk.Frame(self.master, name='content_frame')
         self.content_frame.pack()
 
         # Frames containing letters
@@ -62,10 +66,13 @@ class Othello:
         # Frame containing the game
         self.game_frame = ttk.Frame(self.content_frame, name='game_frame')
         self.game_frame.grid(row=1, column=1)
+        # ------------------------------------------------------------------------
 
-        # Footer frame
-        self.footer_frame = ttk.Frame(master, name='footer_frame')
+        # +++++++++++++++++++++++++++ Footer Frame +++++++++++++++++++++++++++++++
+        self.footer_frame = ttk.Frame(self.master, name='footer_frame')
         self.footer_frame.pack(fill=X)
+        # ------------------------------------------------------------------------
+
         # ------------------------------------------------------------------------
 
         # ++++++++++++++++++++++ Images and Icons ++++++++++++++++++++++++++++++++
@@ -105,6 +112,7 @@ class Othello:
         self.play_icon = PhotoImage(file='Images/play.gif')
         self.reset_icon = PhotoImage(file='Images/reset.gif')
         self.stop_icon = PhotoImage(file='Images/stop.gif')
+        self.start_icon = PhotoImage(file='Images/start.gif')
         # ------------------------------------------------------------------------
 
         # Buttons for playing the game
@@ -114,28 +122,28 @@ class Othello:
                                            width=button_width)
         self.make_move_button.img = self.play_icon
         self.make_move_button.config(image=self.make_move_button.img, compound=LEFT)
-        self.make_move_button.pack(side=LEFT, padx=10)
-
-        self.reset_button = ttk.Button(self.buttons_frame, text='Reset Game', command=self.reset_game,
-                                       name='reset_button',
-                                       width=button_width)
-        self.reset_button.img = self.reset_icon
-        self.reset_button.config(image=self.reset_button.img, compound=LEFT, state=DISABLED)
-        self.reset_button.pack(side=LEFT, padx=10)
-
-        self.next_move_button = ttk.Button(self.buttons_frame, text='Next Move', command=self.next_move,
-                                           name='next_move_button',
-                                           width=button_width)
-        self.next_move_button.img = self.next_icon
-        self.next_move_button.config(image=self.next_move_button.img, compound=LEFT)
-        self.next_move_button.pack(side=RIGHT, padx=10)
+        #self.make_move_button.pack(side=LEFT, padx=10)
 
         self.previous_move_button = ttk.Button(self.buttons_frame, text='Previous Move',
                                                name='previous_move_button',
                                                command=self.previous_move, width=button_width)
         self.previous_move_button.img = self.previous_icon
         self.previous_move_button.config(image=self.previous_move_button.img, compound=LEFT)
-        self.previous_move_button.pack(side=RIGHT, padx=10)
+        self.previous_move_button.pack(side=LEFT, padx=10)
+
+        self.next_move_button = ttk.Button(self.buttons_frame, text='Next Move', command=self.next_move,
+                                           name='next_move_button',
+                                           width=button_width)
+        self.next_move_button.img = self.next_icon
+        self.next_move_button.config(image=self.next_move_button.img, compound=LEFT)
+        self.next_move_button.pack(side=LEFT, padx=10)
+
+        self.reset_button = ttk.Button(self.buttons_frame, text='Reset Game', command=self.reset_game,
+                                       name='reset_button',
+                                       width=button_width)
+        self.reset_button.img = self.reset_icon
+        self.reset_button.config(image=self.reset_button.img, compound=LEFT, state=DISABLED)
+        self.reset_button.pack(side=RIGHT, padx=10)
 
         # +++++++++++++++++++++++++ Configure players ++++++++++++++++++++++++++++
         # Controls for configuring players
@@ -263,6 +271,8 @@ class Othello:
         self.start_game_button = ttk.Button(self.players_frame, text='Start Game',
                                             name='start_game_button',
                                             command=self.start_game)
+        self.start_game_button.img = self.start_icon
+        self.start_game_button.configure(image=self.start_game_button.img, compound=LEFT)
         self.start_game_button.grid(row=2, column=2, sticky='ew')
 
         # Configure column weights on the parent
@@ -298,6 +308,7 @@ class Othello:
             bottom_number_label.pack(side=LEFT, padx=5, pady=5)
 
         # Status display controls in the footer frame
+        # +++++++++++++++++++++++++++++++ Information frame +++++++++++++++++++++++++++++++++
         self.info_frame = ttk.Frame(self.footer_frame, name='info_frame')  # Frame for turn and move labels
         self.info_frame.pack(fill=X, padx=15, pady=5)
 
@@ -307,7 +318,7 @@ class Othello:
         self.turn_label.grid(row=0, column=0, ipady=5, sticky='nsew')
 
         self.turn_color_label = ttk.Label(self.info_frame, name='turn_color_label')
-        self.turn_color_label.config(background='green', foreground='white', text='NONE', width=15,
+        self.turn_color_label.config(background='green', foreground='white', text='NONE',
                                      font=('Arial', 10, 'bold', 'italic'))
         self.turn_color_label.grid(row=0, column=1, ipady=5, sticky='nsew')
 
@@ -316,22 +327,39 @@ class Othello:
                                        name='message_label',
                                        font=('Arial', 10))
         self.message_label.config(background='blue', foreground='yellow', anchor='e', width=50)
-        self.message_label.grid(row=0, column=2, ipady=5, sticky='nsew')
+        #self.message_label.grid(row=0, column=2, ipady=5, sticky='nsew')
 
         # Adjust column weights for info grid
         self.info_frame.grid_columnconfigure(0, weight=1)
         self.info_frame.grid_columnconfigure(1, weight=2)
-        self.info_frame.grid_columnconfigure(2, weight=3)
+        #self.info_frame.grid_columnconfigure(2, weight=3)
+        # -----------------------------------------------------------------------------------
 
-        self.total_moves_label = ttk.Label(self.info_frame, name='total_moves_label')
-        #self.total_moves_label.grid(row=0, column=2, ipady=5)
-
+        # ++++++++++++++++++++++++++++++++++ Progress bar +++++++++++++++++++++++++++++++++++
         self.progress_bar = ttk.Progressbar(self.footer_frame, orient=HORIZONTAL, name='progress_bar')
         self.progress_bar.config(mode='indeterminate')
         self.progress_bar.pack(fill=X, padx=15)
+        # -----------------------------------------------------------------------------------
 
-        self.time_label = ttk.Label(self.footer_frame, name='time_label')
-        self.time_label.pack(fill=X, side=RIGHT, padx=15)
+        # +++++++++++++++++++++++++++++++ Move information frame ++++++++++++++++++++++++++++
+        self.info2_frame = ttk.Frame(self.footer_frame, name='info2_frame')
+        self.info2_frame.pack(fill=X, padx=15, pady=5)
+
+        self.move_history_label = ttk.Label(self.info2_frame, name='move_history_label')
+        self.move_history_label.config(background='green', foreground='yellow', text='Current player:',
+                                       font=('Arial', 10))
+        self.move_history_label.grid(row=0, column=0, ipady=5, sticky='nsew')
+
+        self.timer_label = ttk.Label(self.info2_frame,
+                                     name='timer_label',
+                                     font=('Arial', 10))
+        self.timer_label.config(background='blue', foreground='yellow')
+        self.timer_label.grid(row=0, column=1, ipady=5, sticky='nsew')
+
+        self.info2_frame.grid_columnconfigure(0, weight=1)
+        self.info2_frame.grid_columnconfigure(1, weight=1)
+        # -----------------------------------------------------------------------------------
+
         self.start_time()
 
         # +++++++++++++++++++++++++++ Board grid +++++++++++++++++++++++++++++++++
@@ -428,7 +456,7 @@ class Othello:
                 text='{} ({})'.format(self.players[self.current_player], Board.get_color_string(self.current_player)),
                 foreground='black' if self.current_player == BLACK else 'white')
 
-        self.total_moves_label.config(
+        self.move_history_label.config(
             text='Total moves: {}{}'.format(len(self.all_moves),
                                             ' (Current Move: {})'.format(self.move_history_index)
                                             if self.move_history_index != all_moves and self.move_history_index != 0
@@ -455,6 +483,32 @@ class Othello:
         elif len(self.players) > 0:
             self.message_label.config(text='Select your move by clicking one of the highlighted legal moves')
 
+        if self.board.is_game_over():
+            black_score, white_score = self.board.get_final_score()
+            game_over_message = 'Game Over!\n'
+            if white_score == black_score:
+                game_over_message += 'We have a tie!!!'
+            else:
+                game_over_message += '{} ({}) Wins the game!!!'.format(
+                    self.players[BLACK] if black_score > white_score else self.players[WHITE],
+                    Board.get_color_string(BLACK) if black_score > white_score else Board.get_color_string(WHITE))
+
+            game_over_message += '\n\nFinal Score of the players:\n' + \
+                                 'Black:      {}\n'.format(black_score) + \
+                                 'White:     {}'.format(white_score)
+
+            messagebox.showinfo(title='Game Over',
+                                message=game_over_message)
+
+            return
+
+        # If current player is not human and we're not going through move history, make a move
+        if self.current_player != 0 and \
+                self.move_history_index == all_moves and \
+                not isinstance(self.players[self.current_player], HumanPlayer):
+
+            self.make_move()
+
     def start_game(self):
         if self.black_player_name.get() == '' or self.white_player_name.get() == '':
             messagebox.showerror(title='Missing Player Info',
@@ -468,6 +522,11 @@ class Othello:
         white_player_type = PlayerType(self.white_player_type.get())
         black_player_name = self.black_player_name.get()
         white_player_name = self.white_player_name.get()
+
+        if black_player_type != PlayerType.human and white_player_type != PlayerType.human:
+            messagebox.showerror(title='Player Type Error',
+                                 message='At least one of the players should be a human player')
+            return
 
         if black_player_type == PlayerType.human:
             self.players[BLACK] = HumanPlayer(black_player_name)
@@ -531,18 +590,18 @@ class Othello:
         self.update()
 
     def start_time(self):
-        self.time_label.config(text='5')
+        self.timer_label.config(text='5')
         self.display_time()
 
     def display_time(self):
         # now = strftime('%H:%M:%S')
-        current_value = int(self.time_label.cget('text'))
+        current_value = int(self.timer_label.cget('text'))
         if current_value == 1:
-            self.time_label.config(text='0')
+            self.timer_label.config(text='0')
             print("CHANGE TURN")
         else:
-            self.time_label.config(text=str(current_value - 1))
-            self.time_label.after(1000, self.display_time)
+            self.timer_label.config(text=str(current_value - 1))
+            self.timer_label.after(1000, self.display_time)
 
     def change_turn(self):
         self.current_player *= -1
@@ -584,27 +643,8 @@ class Othello:
         self.move_history_index += 1
         self.board = self.board.execute_move(self.last_move)
         self.change_turn()
+        self.progress_bar.stop()
         self.update()
-
-        if self.board.is_game_over():
-            # Stop the progress bar
-            self.progress_bar.stop()
-
-            black_score, white_score = self.board.get_final_score()
-            game_over_message = 'Game Over!\n'
-            if white_score == black_score:
-                game_over_message += 'We have a tie!!!'
-            else:
-                game_over_message += '{} ({}) Wins the game!!!'.format(
-                    self.players[BLACK] if black_score > white_score else self.players[WHITE],
-                    Board.get_color_string(BLACK) if black_score > white_score else Board.get_color_string(WHITE))
-
-            game_over_message += '\n\nFinal Score of the players:\n' + \
-                                 'Black:      {}\n'.format(black_score) + \
-                                 'White:     {}'.format(white_score)
-
-            messagebox.showinfo(title='Game Over',
-                                message=game_over_message)
 
     def previous_move(self):
         self.move_history_index -= 1
