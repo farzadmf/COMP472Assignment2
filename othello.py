@@ -27,42 +27,44 @@ class Othello:
 
         # ++++++++++++++++++++++++++++++ Frames ++++++++++++++++++++++++++++++++++
         # Header frame
-        self.header_frame = ttk.Frame(master)
+        self.header_frame = ttk.Frame(master, name='header_frame')
         self.header_frame.pack(fill=X)
 
         # Frame for configuring players
         self.player_config_label = ttk.Label(text='Player Configuration:',
                                              font=('Arial', 12, 'bold', 'italic', 'underline'),
-                                             foreground=PLAYER_FOREGROUND, background=PLAYER_BACKGROUND)
-        self.players_frame = ttk.LabelFrame(self.header_frame, labelwidget=self.player_config_label)
+                                             foreground=PLAYER_FOREGROUND, background=PLAYER_BACKGROUND,
+                                             name='player_config_label')
+        self.players_frame = ttk.LabelFrame(self.header_frame, labelwidget=self.player_config_label,
+                                            name='players_frame')
         self.players_frame.pack(fill=X, padx=5, pady=(5, 0))
 
         # Frame containing buttons
-        self.buttons_frame = ttk.Frame(self.header_frame)
+        self.buttons_frame = ttk.Frame(self.header_frame, name='buttons_frame')
         self.buttons_frame.pack(fill=X, pady=5)
 
         # Content frame containing game and table
-        self.content_frame = ttk.Frame(master)
+        self.content_frame = ttk.Frame(master, name='content_frame')
         self.content_frame.pack()
 
         # Frames containing letters
-        self.left_numbers = ttk.Frame(self.content_frame)
-        self.right_numbers = ttk.Frame(self.content_frame)
+        self.left_numbers = ttk.Frame(self.content_frame, name='left_numbers')
+        self.right_numbers = ttk.Frame(self.content_frame, name='right_numbers')
         self.left_numbers.grid(row=1, column=0)
         self.right_numbers.grid(row=1, column=2)
 
         # Frames containing numbers
-        self.top_letters = ttk.Frame(self.content_frame)
-        self.bottom_letters = ttk.Frame(self.content_frame)
+        self.top_letters = ttk.Frame(self.content_frame, name='top_letters')
+        self.bottom_letters = ttk.Frame(self.content_frame, name='bottom_letters')
         self.top_letters.grid(row=0, column=1)
         self.bottom_letters.grid(row=2, column=1)
 
         # Frame containing the game
-        self.game_frame = ttk.Frame(self.content_frame)
+        self.game_frame = ttk.Frame(self.content_frame, name='game_frame')
         self.game_frame.grid(row=1, column=1)
 
         # Footer frame
-        self.footer_frame = ttk.Frame(master)
+        self.footer_frame = ttk.Frame(master, name='footer_frame')
         self.footer_frame.pack(fill=X)
         # ------------------------------------------------------------------------
 
@@ -108,24 +110,28 @@ class Othello:
         # Buttons for playing the game
         button_width = 13
         self.make_move_button = ttk.Button(self.buttons_frame, text='Make Move', command=self.make_move,
+                                           name='make_move_button',
                                            width=button_width)
         self.make_move_button.img = self.play_icon
         self.make_move_button.config(image=self.make_move_button.img, compound=LEFT)
         self.make_move_button.pack(side=LEFT, padx=10)
 
         self.reset_button = ttk.Button(self.buttons_frame, text='Reset Game', command=self.reset_game,
+                                       name='reset_button',
                                        width=button_width)
         self.reset_button.img = self.reset_icon
         self.reset_button.config(image=self.reset_button.img, compound=LEFT, state=DISABLED)
         self.reset_button.pack(side=LEFT, padx=10)
 
         self.next_move_button = ttk.Button(self.buttons_frame, text='Next Move', command=self.next_move,
+                                           name='next_move_button',
                                            width=button_width)
         self.next_move_button.img = self.next_icon
         self.next_move_button.config(image=self.next_move_button.img, compound=LEFT)
         self.next_move_button.pack(side=RIGHT, padx=10)
 
         self.previous_move_button = ttk.Button(self.buttons_frame, text='Previous Move',
+                                               name='previous_move_button',
                                                command=self.previous_move, width=button_width)
         self.previous_move_button.img = self.previous_icon
         self.previous_move_button.config(image=self.previous_move_button.img, compound=LEFT)
@@ -157,6 +163,7 @@ class Othello:
             background=PLAYER_BACKGROUND)
         self.black_player_frame = ttk.LabelFrame(
             self.players_frame,
+            name='black_player_frame',
             labelwidget=self.black_player_label)
         self.black_player_frame.grid(row=0, column=0, sticky=W, rowspan=3)
 
@@ -165,6 +172,7 @@ class Othello:
                   background=PLAYER_BACKGROUND).grid(row=0, column=0, sticky='e')
         self.black_player_name_entry = ttk.Entry(
             self.black_player_frame,
+            name='black_player_name_entry',
             textvariable=self.black_player_name)
         self.black_player_name_entry.grid(row=0, column=1, padx=5, sticky=N+S+E+W)
 
@@ -174,6 +182,7 @@ class Othello:
         self.black_player_type_combo = ttk.Combobox(
             self.black_player_frame,
             values=list(member.value for _, member in PlayerType.__members__.items()),
+            name='black_player_type_combo',
             textvariable=self.black_player_type)
         self.black_player_type_combo.bind(
             '<<ComboboxSelected>>', lambda event: self.update_level_spinbox(event, BLACK))
@@ -187,6 +196,7 @@ class Othello:
             self.black_player_frame,
             from_=1, to=6,
             width=18,
+            name='black_player_level_spin',
             textvariable=self.black_player_level)
         self.black_level_spin.configure(state=DISABLED, disabledbackground=DISABLED_COLOR)
         self.black_level_spin.grid(row=2, column=1, sticky='nsew', padx=5)
@@ -201,6 +211,7 @@ class Othello:
             background=PLAYER_BACKGROUND)
         self.white_player_frame = ttk.LabelFrame(
             self.players_frame,
+            name='white_player_frame',
             labelwidget=self.white_player_label)
         self.white_player_frame.grid(row=0, column=1, sticky=W, rowspan=3)
 
@@ -209,6 +220,7 @@ class Othello:
                   background=PLAYER_BACKGROUND).grid(row=0, column=0, sticky='e')
         self.white_player_name_entry = ttk.Entry(
             self.white_player_frame,
+            name='white_player_name_entry',
             textvariable=self.white_player_name)
         self.white_player_name_entry.grid(row=0, column=1, padx=5, sticky='nsew')
 
@@ -218,6 +230,7 @@ class Othello:
         self.white_player_type_combo = ttk.Combobox(
             self.white_player_frame,
             values=list(member.value for _, member in PlayerType.__members__.items()),
+            name='white_player_type_combo',
             textvariable=self.white_player_type)
         self.white_player_type_combo.bind(
             '<<ComboboxSelected>>', lambda event: self.update_level_spinbox(event, WHITE))
@@ -226,13 +239,14 @@ class Othello:
         # Label and spin-box for the level
         ttk.Label(self.white_player_frame, text='Level: ',
                   background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky='nsew')
-        self.white_level_spin = Spinbox(
+        self.white_player_level_spin = Spinbox(
             self.white_player_frame,
             from_=1, to=6,
             width=18,
+            name='white_player_level_spin',
             textvariable=self.white_player_level)
-        self.white_level_spin.configure(state=DISABLED, disabledbackground=DISABLED_COLOR)
-        self.white_level_spin.grid(row=2, column=1, sticky='nsew', padx=5)
+        self.white_player_level_spin.configure(state=DISABLED, disabledbackground=DISABLED_COLOR)
+        self.white_player_level_spin.grid(row=2, column=1, sticky='nsew', padx=5)
         # -------------------------------------------------------------------------
 
         # Time out label and spin-box
@@ -241,11 +255,13 @@ class Othello:
         self.time_out_spin = Spinbox(
             self.players_frame,
             from_=1, to=60,
+            name='time_out_spin',
             textvariable=self.time_out_value)
         self.time_out_spin.grid(row=1, column=2, sticky='ew')
 
         # Start game button
         self.start_game_button = ttk.Button(self.players_frame, text='Start Game',
+                                            name='start_game_button',
                                             command=self.start_game)
         self.start_game_button.grid(row=2, column=2, sticky='ew')
 
@@ -282,21 +298,22 @@ class Othello:
             bottom_number_label.pack(side=LEFT, padx=5, pady=5)
 
         # Status display controls in the footer frame
-        self.info_frame = ttk.Frame(self.footer_frame)  # Frame for turn and move labels
+        self.info_frame = ttk.Frame(self.footer_frame, name='info_frame')  # Frame for turn and move labels
         self.info_frame.pack(fill=X, padx=15, pady=5)
 
-        self.turn_label = ttk.Label(self.info_frame)
+        self.turn_label = ttk.Label(self.info_frame, name='turn_label')
         self.turn_label.config(background='green', foreground='yellow', text='Current player:',
                                font=('Arial', 10))
         self.turn_label.grid(row=0, column=0, ipady=5, sticky='nsew')
 
-        self.turn_color_label = ttk.Label(self.info_frame)
+        self.turn_color_label = ttk.Label(self.info_frame, name='turn_color_label')
         self.turn_color_label.config(background='green', foreground='white', text='NONE', width=15,
                                      font=('Arial', 10, 'bold', 'italic'))
         self.turn_color_label.grid(row=0, column=1, ipady=5, sticky='nsew')
 
         self.message_label = ttk.Label(self.info_frame,
                                        text="Configure the players and click 'Start Game' to start the game",
+                                       name='message_label',
                                        font=('Arial', 10))
         self.message_label.config(background='blue', foreground='yellow', anchor='e', width=50)
         self.message_label.grid(row=0, column=2, ipady=5, sticky='nsew')
@@ -306,14 +323,14 @@ class Othello:
         self.info_frame.grid_columnconfigure(1, weight=2)
         self.info_frame.grid_columnconfigure(2, weight=3)
 
-        self.total_moves_label = ttk.Label(self.info_frame)
+        self.total_moves_label = ttk.Label(self.info_frame, name='total_moves_label')
         #self.total_moves_label.grid(row=0, column=2, ipady=5)
 
-        self.progress_bar = ttk.Progressbar(self.footer_frame, orient=HORIZONTAL)
+        self.progress_bar = ttk.Progressbar(self.footer_frame, orient=HORIZONTAL, name='progress_bar')
         self.progress_bar.config(mode='indeterminate')
         self.progress_bar.pack(fill=X, padx=15)
 
-        self.time_label = ttk.Label(self.footer_frame)
+        self.time_label = ttk.Label(self.footer_frame, name='time_label')
         self.time_label.pack(fill=X, side=RIGHT, padx=15)
         self.start_time()
 
@@ -481,7 +498,7 @@ class Othello:
         if color == BLACK:
             self.black_level_spin.configure(state=DISABLED if event.widget.get() == 'Human' else NORMAL)
         elif color == WHITE:
-            self.white_level_spin.configure(state=DISABLED if event.widget.get() == 'Human' else NORMAL)
+            self.white_player_level_spin.configure(state=DISABLED if event.widget.get() == 'Human' else NORMAL)
 
     def reset_players(self):
         self.black_player_type.set(PlayerType.human.value)
@@ -503,7 +520,7 @@ class Othello:
         self.white_player_type_combo.config(state=NORMAL)
         self.start_game_button.config(state=NORMAL)
         self.reset_button.config(state=DISABLED)
-        self.white_level_spin.configure(state=DISABLED)
+        self.white_player_level_spin.configure(state=DISABLED)
         self.black_level_spin.configure(state=DISABLED)
 
         self.reset_players()
