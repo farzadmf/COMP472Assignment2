@@ -1,6 +1,40 @@
-from player import Player, GreedyPlayer, CompositePlayer
+from player import Player, PlayerType, create_player
 from board import Board, BLACK, WHITE
 import time
+import argparse
+
+# Valid choices for player type
+player_types = [member.value for _, member in PlayerType.__members__.items() if member.value != 'Human']
+
+# Minimum and maximum values
+minimum_level = 1
+maximum_level = 6
+minimum_timeout = 1
+maximum_timeout = 60
+
+# Helper variables
+range_meta_variable = 'Values: [{} ... {}]'
+
+# Configure command-line arguments
+parser = argparse.ArgumentParser(description='Program to Run a Series of Othello Games with Specified Features',
+                                 formatter_class=argparse.RawTextHelpFormatter)
+# start_state_group = parser.add_mutually_exclusive_group()
+
+parser.add_argument('-bp', '--black_player', help='Type of the Black Player', type=str,
+                    choices=player_types)
+parser.add_argument('-wp', '--white_player', help='Type of the White Player', type=str,
+                    choices=player_types)
+parser.add_argument('-min', '--min_level', help='Minimum Level to Start with (default = 1)',
+                    type=int, choices=range(minimum_level, maximum_level + 1), default=1,
+                    metavar=range_meta_variable.format(minimum_level, maximum_level))
+parser.add_argument('-max', '--max_level', help='Maximum Level to Reach (default = 1)',
+                    type=int, choices=range(minimum_level, maximum_level + 1), default=1,
+                    metavar=range_meta_variable.format(minimum_level, maximum_level))
+parser.add_argument('-t', '--time_out', help='Time-out Value (in Seconds) for each Move (default = 10)',
+                    type=int, choices=range(minimum_timeout, maximum_timeout + 1), default=10,
+                    metavar=range_meta_variable.format(minimum_timeout, maximum_timeout))
+
+args = parser.parse_args()
 
 
 class OthelloRunner:
@@ -36,6 +70,8 @@ class OthelloRunner:
             header = '{}\n{}'.format(header1, header2)
             header_length = len(header1) - 2
 
+        move_timeout_message = 'Move Time-out Value is {} Second{}'.format(
+            args.time_out, 's' if args.time_out > 1 else '')
         header_line = '+{}+'.format('-' * header_length)
         separator = '=' * separator_length
         print('\n{}\n'.format(separator))
@@ -43,6 +79,9 @@ class OthelloRunner:
         print('{}'.format(header))
         print(header_line)
         print()
+        print(move_timeout_message)
+        print('-' * len(move_timeout_message))
+        print('\n')
 
         for level in range(min_level, max_level + 1):
             self.board = Board()
@@ -65,8 +104,7 @@ class OthelloRunner:
             # input()
             current_player = self.players[self.board.get_turn()]  # type: Player
 
-            next_move, _ = current_player.get_best_move(self.board, level, self.time_out,
-                                                        raise_exception=False)
+            next_move, _ = current_player.get_best_move(self.board, level, self.time_out)
 
             self.board = self.board.execute_move(next_move)
         end_time = time.time()
@@ -102,26 +140,20 @@ class OthelloRunner:
 
 
 if __name__ == '__main__':
-    tester = OthelloRunner()
+    if args.black_player is None or args.white_player is None:
+        print('You must specify both player types')
+        exit(1)
 
-    minimum = 1
-    maximum = 5
-    time_out_value = 1
+    black_player_type = PlayerType(args.black_player)
+    white_player_type = PlayerType(args.white_player)
 
-    tester.play_series(black_player=GreedyPlayer('black'),
-                       white_player=GreedyPlayer('white'),
-                       min_level=minimum,
-                       max_level=maximum,
-                       time_out=time_out_value)
+    black = create_player(black_player_type, 'BLACK')
+    white = create_player(white_player_type, 'WHITE')
 
-    tester.play_series(black_player=CompositePlayer('black'),
-                       white_player=GreedyPlayer('white'),
-                       min_level=minimum,
-                       max_level=maximum,
-                       time_out=time_out_value)
+    runner = OthelloRunner()
 
-    tester.play_series(black_player=CompositePlayer('black'),
-                       white_player=CompositePlayer('white'),
-                       min_level=minimum,
-                       max_level=maximum,
-                       time_out=1)
+    runner.play_series(black_player=black,
+                       white_player=white,
+                       min_level=args.min_level,
+                       max_level=args.max_level,
+                       time_out=args.time_out)

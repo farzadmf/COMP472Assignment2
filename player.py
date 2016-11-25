@@ -59,3 +59,18 @@ class CompositePlayer(Player):
 
     def get_type_name(self):
         return 'Composite'
+
+
+def create_player(player_type: PlayerType, player_name: str):
+    """
+    Create a player based on the type
+    :param player_type: type of the player to be created
+    :param player_name: name of the player to be created
+    :return: player object
+    """
+    if player_type == PlayerType.human:
+        return HumanPlayer(player_name)
+    if player_type == PlayerType.greedy:
+        return GreedyPlayer(player_name)
+    if player_type == PlayerType.composite:
+        return CompositePlayer(player_name)
