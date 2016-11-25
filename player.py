@@ -15,9 +15,9 @@ class Player:
         self.name = name
         self.agent = None  # type: AlphaBeta
 
-    def get_best_move(self, board: Board, max_level, time_out, raise_exception=True):
+    def get_best_move(self, board: Board, max_level, time_out):
         self.agent = AlphaBeta(max_level, self.player_type)
-        return self.agent.get_best_action_and_value(board, time_out, raise_exception)
+        return self.agent.get_best_action_and_value(board, time_out)
 
     def stop_move(self):
         self.agent.stop = True

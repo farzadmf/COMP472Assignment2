@@ -3,8 +3,6 @@ from tkinter import ttk
 from player import PlayerType, HumanPlayer, GreedyPlayer, CompositePlayer
 from board import Board, BLACK, WHITE
 import threading
-from mini_max import TimeOutException
-from time import *
 from tkinter import messagebox
 
 PLAYER_FOREGROUND = '#A5201C'
@@ -22,6 +20,7 @@ class Othello:
         self.move_thread = threading.Thread()
         self.board = Board()  # type: Board
         self.last_move = tuple()  # type: tuple
+        self.last_color = 0
         self.all_moves = []
         self.move_history_index = 0
 
@@ -198,7 +197,7 @@ class Othello:
 
         # Label and spin-box for the level
         ttk.Label(self.black_player_frame, text='Level: ',
-                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky=N+S+E+W)
+                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky=E)
 
         self.black_level_spin = Spinbox(
             self.black_player_frame,
@@ -246,7 +245,7 @@ class Othello:
 
         # Label and spin-box for the level
         ttk.Label(self.white_player_frame, text='Level: ',
-                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky='nsew')
+                  background=PLAYER_BACKGROUND).grid(row=2, column=0, sticky='e')
         self.white_player_level_spin = Spinbox(
             self.white_player_frame,
             from_=1, to=6,
@@ -322,17 +321,17 @@ class Othello:
                                      font=('Arial', 10, 'bold', 'italic'))
         self.turn_color_label.grid(row=0, column=1, ipady=5, sticky='nsew')
 
-        self.message_label = ttk.Label(self.info_frame,
-                                       text="Configure the players and click 'Start Game' to start the game",
-                                       name='message_label',
-                                       font=('Arial', 10))
-        self.message_label.config(background='blue', foreground='yellow', anchor='e', width=50)
-        #self.message_label.grid(row=0, column=2, ipady=5, sticky='nsew')
+        self.last_move_label = ttk.Label(self.info_frame,
+                                         name='last_move_label',
+                                         width=20,
+                                         font=('Arial', 10))
+        self.last_move_label.config(background='blue', foreground='yellow', anchor='e')
+        self.last_move_label.grid(row=0, column=2, ipady=5, sticky='nsew')
 
         # Adjust column weights for info grid
         self.info_frame.grid_columnconfigure(0, weight=1)
         self.info_frame.grid_columnconfigure(1, weight=2)
-        #self.info_frame.grid_columnconfigure(2, weight=3)
+        self.info_frame.grid_columnconfigure(2, weight=1)
         # -----------------------------------------------------------------------------------
 
         # ++++++++++++++++++++++++++++++++++ Progress bar +++++++++++++++++++++++++++++++++++
@@ -346,21 +345,25 @@ class Othello:
         self.info2_frame.pack(fill=X, padx=15, pady=5)
 
         self.move_history_label = ttk.Label(self.info2_frame, name='move_history_label')
-        self.move_history_label.config(background='green', foreground='yellow', text='Current player:',
-                                       font=('Arial', 10))
+        self.move_history_label.config(
+            background='indian red',
+            foreground='white',
+            width=43,
+            text='Current player:',
+            font=('Arial', 10))
         self.move_history_label.grid(row=0, column=0, ipady=5, sticky='nsew')
 
         self.timer_label = ttk.Label(self.info2_frame,
                                      name='timer_label',
                                      font=('Arial', 10))
-        self.timer_label.config(background='blue', foreground='yellow')
+        self.timer_label.config(background='bisque2', foreground='black')
         self.timer_label.grid(row=0, column=1, ipady=5, sticky='nsew')
 
         self.info2_frame.grid_columnconfigure(0, weight=1)
         self.info2_frame.grid_columnconfigure(1, weight=1)
-        # -----------------------------------------------------------------------------------
 
-        self.start_time()
+        self.start_timer()
+        # -----------------------------------------------------------------------------------
 
         # +++++++++++++++++++++++++++ Board grid +++++++++++++++++++++++++++++++++
         # Initialize all the cells to empty
@@ -430,17 +433,25 @@ class Othello:
                 else:
                     cell_label.img = self.empty_token if move not in valid_moves else self.valid_move
 
-                # Enable selecting the move by mouse for a human player, but we don't want to do it if we're moving
-                #   through move history
-                if move in valid_moves and self.current_player != 0 and isinstance(
-                        self.players[self.current_player], HumanPlayer) and self.move_history_index == len(
-                        self.all_moves):
+                cell_label.config(image=cell_label.img)
 
+                human_move = False
+                # If current player is human, and we're not moving through move history
+                if self.current_player != 0 and isinstance(
+                   self.players[self.current_player], HumanPlayer) and self.move_history_index == len(
+                   self.all_moves):
+
+                    human_move = True
+
+                    # If human doesn't have a move, he has to pass
+                    if len(valid_moves) == 0:
+                        self.make_move_human(None, True)
+
+                # Enable selecting the move by mouse for a human player
+                if move in valid_moves and human_move:
                     cell_label.bind('<ButtonPress-1>', self.make_move_human)
                 else:
                     cell_label.unbind('<ButtonPress-1>')
-
-                cell_label.config(image=cell_label.img)
 
         # Update next and previous move buttons
         all_moves = len(self.all_moves)
@@ -479,9 +490,9 @@ class Othello:
         #   *) If it's disabled (and the game has started), player should click on one of the legal moves
         #   *) It it's enabled, we should click on it to make the computer move
         if 'disabled' not in self.make_move_button.state():
-            self.message_label.config(text="Select 'Make Move' button to execute next move")
+            self.last_move_label.config(text="Select 'Make Move' button to execute next move")
         elif len(self.players) > 0:
-            self.message_label.config(text='Select your move by clicking one of the highlighted legal moves')
+            self.last_move_label.config(text='Select your move by clicking one of the highlighted legal moves')
 
         if self.board.is_game_over():
             black_score, white_score = self.board.get_final_score()
@@ -508,6 +519,16 @@ class Othello:
                 not isinstance(self.players[self.current_player], HumanPlayer):
 
             self.make_move()
+
+        # Update last-move label
+        self.last_move_label.configure(text='Last Move: {}'.format(
+            'None' if self.last_move == tuple() else '{} {}'.format(
+                self.board.get_color_string(self.last_color),
+                "to ' {} '".format(
+                    self.board.move_string(self.last_move)
+                    if self.last_move is not None
+                    else 'PASSED')
+            )))
 
     def start_game(self):
         if self.black_player_name.get() == '' or self.white_player_name.get() == '':
@@ -586,22 +607,22 @@ class Othello:
         self.board = Board()
         self.all_moves = []
         self.last_move = tuple()
+        self.last_color = 0
         self.move_history_index = 0
         self.update()
 
-    def start_time(self):
-        self.timer_label.config(text='5')
-        self.display_time()
+    def start_timer(self):
+        self.timer_label.config(text='Time Remaining: {}'.format(self.time_out_value.get()))
+        self.display_timer()
 
-    def display_time(self):
-        # now = strftime('%H:%M:%S')
-        current_value = int(self.timer_label.cget('text'))
+    def display_timer(self):
+        current_value = int(str(self.timer_label.cget('text')).split(': ')[1])
         if current_value == 1:
-            self.timer_label.config(text='0')
+            self.timer_label.config(text='Time Remaining: 0')
             print("CHANGE TURN")
         else:
-            self.timer_label.config(text=str(current_value - 1))
-            self.timer_label.after(1000, self.display_time)
+            self.timer_label.config(text='Time Remaining: {}'.format(current_value - 1))
+            self.timer_label.after(1000, self.display_timer)
 
     def change_turn(self):
         self.current_player *= -1
@@ -612,9 +633,13 @@ class Othello:
         else:
             self.progress_bar.stop()
 
-    def make_move_human(self, event):
-        next_move = (event.widget.row, event.widget.column)
+    def make_move_human(self, event, force=False):
+        if force:
+            messagebox.showinfo(title='No Valid Move',
+                                message="There's no valid move! You have to pass!")
+        next_move = (event.widget.row, event.widget.column) if not force else None
         self.last_move = next_move
+        self.last_color = self.current_player
         self.execute_move()
 
     def make_move(self):
@@ -628,14 +653,9 @@ class Othello:
     def get_move(self):
         current_player = self.players[self.current_player]
         player_level = self.black_player_level.get() if self.current_player == BLACK else self.white_player_level.get()
-        next_move = None
-
-        try:
-            next_move, value = current_player.get_best_move(self.board, player_level, self.time_out_value.get())
-        except TimeOutException:
-            print("player passed")
-
+        next_move, value = current_player.get_best_move(self.board, player_level, self.time_out_value.get())
         self.last_move = next_move
+        self.last_color = self.current_player
         self.execute_move()
 
     def execute_move(self):
