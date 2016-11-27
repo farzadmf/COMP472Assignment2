@@ -6,6 +6,7 @@ from mini_max import AgentType, AlphaBeta
 class PlayerType(Enum):
     human = 'Human'
     greedy = 'Greedy'
+    simple = 'Simple'
     composite = 'Composite'
 
 
@@ -51,6 +52,16 @@ class GreedyPlayer(Player):
         return 'Greedy'
 
 
+class SimplePlayer(Player):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.player_type = AgentType.simple
+
+    def get_type_name(self):
+        return 'Simple'
+
+
 class CompositePlayer(Player):
 
     def __init__(self, name):
@@ -72,5 +83,7 @@ def create_player(player_type: PlayerType, player_name: str):
         return HumanPlayer(player_name)
     if player_type == PlayerType.greedy:
         return GreedyPlayer(player_name)
+    if player_type == PlayerType.simple:
+        return SimplePlayer(player_name)
     if player_type == PlayerType.composite:
         return CompositePlayer(player_name)

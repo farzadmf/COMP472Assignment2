@@ -460,7 +460,7 @@ class Othello:
 
         if self.board.is_game_over():
             self.stop_timer = True
-            
+
             black_score, white_score = self.board.get_final_score()
             game_over_message = 'Game Over!\n'
             if white_score == black_score:
