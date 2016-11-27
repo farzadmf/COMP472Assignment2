@@ -9,7 +9,7 @@ class PlayerType(Enum):
     simple = 'Simple'
     composite = 'Composite'
     mobile = 'Mobile'
-    greedy = 'Greedy'
+    corner = 'Corner'
 
 
 class Player:
