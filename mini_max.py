@@ -5,6 +5,8 @@ import time
 class AgentType(Enum):
     greedy = 'Greedy'
     composite = 'Composite'
+    mobile = 'Mobile'
+    corner = 'Corner'
 
 
 class AlphaBeta:

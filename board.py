@@ -53,6 +53,8 @@ class Board:
         self.heuristics = dict()
         self.heuristics[AgentType.greedy] = self.get_count
         self.heuristics[AgentType.composite] = self.composite_heuristic
+        self.heuristics[AgentType.mobile] = self.mobile_greedy
+        self.heuristics[AgentType.corner] = self.greedy_corner
 
     def clone(self):
         """
@@ -525,6 +527,49 @@ class Board:
         return (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m) + (74.396 * f) + (10 * d)
 
     # ##########################################################################
+
+    def mobile_greedy(self):
+        return (10 * self.get_count() + 42 * self.mobility())
+
+    def greedy_corner(self):
+        return (10 * self.get_count() + 801 * self.corner_occupancy())
+
+	def mobility(self):
+		# Get my moves
+        my_moves = len(self.get_legal_moves(self.__turn))
+		opponent_moves = len(self.get_legal_moves(-self.__turn))
+
+		if my_moves > opponent_moves:
+			return (100 * my_moves) / (my_moves + opponent_moves)
+		elif myMoves < opponentMoves:
+			return (-100 * opponent_moves) / (my_moves + opponent_moves)
+		else:
+			return 0
+
+	def corner_occupancy(self):
+		my_tiles = 0
+		opponent_tiles = 0
+		if self[0][0] == self.__turn:
+			my_tiles += 1
+		elif self[0][0] == -self.__turn:
+			opponent_tiles += 1
+
+		if self[0][7] == self.__turn:
+			my_tiles += 1
+		elif self[0][7] == -self.__turn:
+			opponent_tiles += 1
+
+		if self[7][0] == self.__turn:
+			my_tiles += 1
+		elif self[7][0] == -self.__turn:
+			opponent_tiles += 1
+
+		if self[7][7] == self.__turn:
+			my_tiles += 1
+		elif self[7][7] == -self.__turn:
+			opponent_tiles += 1
+
+		return 25 * (my_tiles - opponent_tiles)
 
     @staticmethod
     def _increment_move(move, direction):

@@ -7,6 +7,8 @@ class PlayerType(Enum):
     human = 'Human'
     greedy = 'Greedy'
     composite = 'Composite'
+    mobile = 'Mobile'
+    greedy = 'Greedy'
 
 
 class Player:
@@ -60,6 +62,23 @@ class CompositePlayer(Player):
     def get_type_name(self):
         return 'Composite'
 
+class MobilePlayer(Player):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.player_type = AgentType.mobile
+
+    def get_type_name(self):
+        return 'Mobile'
+
+class CornerPlayer(Player):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.player_type = AgentType.corner
+
+    def get_type_name(self):
+        return 'Corner'
 
 def create_player(player_type: PlayerType, player_name: str):
     """
@@ -74,3 +93,7 @@ def create_player(player_type: PlayerType, player_name: str):
         return GreedyPlayer(player_name)
     if player_type == PlayerType.composite:
         return CompositePlayer(player_name)
+    if player_type == PlayerType.mobile:
+        return MobilePlayer(player_name)
+    if player_type == PlayerType.corner:
+        return CornerPlayer(player_name)
