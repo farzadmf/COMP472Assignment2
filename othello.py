@@ -23,6 +23,8 @@ class Othello:
         self.last_color = 0
         self.all_moves = []
         self.move_history_index = 0
+        self.game_started = False
+        self.stop_timer = False
 
         # ++++++++++++++++++++++++++++++ Frames ++++++++++++++++++++++++++++++++++
 
@@ -313,11 +315,13 @@ class Othello:
 
         self.turn_label = ttk.Label(self.info_frame, name='turn_label')
         self.turn_label.config(background='green', foreground='yellow', text='Current player:',
+                               width=10,
                                font=('Arial', 10))
         self.turn_label.grid(row=0, column=0, ipady=5, sticky='nsew')
 
         self.turn_color_label = ttk.Label(self.info_frame, name='turn_color_label')
         self.turn_color_label.config(background='green', foreground='white', text='NONE',
+                                     width=20,
                                      font=('Arial', 10, 'bold', 'italic'))
         self.turn_color_label.grid(row=0, column=1, ipady=5, sticky='nsew')
 
@@ -355,14 +359,13 @@ class Othello:
 
         self.timer_label = ttk.Label(self.info2_frame,
                                      name='timer_label',
+                                     width=10,
                                      font=('Arial', 10))
         self.timer_label.config(background='bisque2', foreground='black')
         self.timer_label.grid(row=0, column=1, ipady=5, sticky='nsew')
 
         self.info2_frame.grid_columnconfigure(0, weight=1)
         self.info2_frame.grid_columnconfigure(1, weight=1)
-
-        self.start_timer()
         # -----------------------------------------------------------------------------------
 
         # +++++++++++++++++++++++++++ Board grid +++++++++++++++++++++++++++++++++
@@ -436,8 +439,10 @@ class Othello:
                 cell_label.config(image=cell_label.img)
 
                 human_move = False
-                # If current player is human, and we're not moving through move history
-                if self.current_player != 0 and isinstance(
+                # If current player is human, and we're not moving through move history, we configure click
+                #       events for cells corresponding to valid moves (and of course the game shouldn't be
+                #       over in order to do it!)
+                if not self.board.is_game_over() and self.current_player != 0 and isinstance(
                    self.players[self.current_player], HumanPlayer) and self.move_history_index == len(
                    self.all_moves):
 
@@ -452,6 +457,27 @@ class Othello:
                     cell_label.bind('<ButtonPress-1>', self.make_move_human)
                 else:
                     cell_label.unbind('<ButtonPress-1>')
+
+        if self.board.is_game_over():
+            self.stop_timer = True
+            
+            black_score, white_score = self.board.get_final_score()
+            game_over_message = 'Game Over!\n'
+            if white_score == black_score:
+                game_over_message += 'We have a tie!!!'
+            else:
+                game_over_message += '{} ({}) Wins the game!!!'.format(
+                    self.players[BLACK] if black_score > white_score else self.players[WHITE],
+                    Board.get_color_string(BLACK) if black_score > white_score else Board.get_color_string(WHITE))
+
+            game_over_message += '\n\nFinal Score of the players:\n' + \
+                                 'Black:      {}\n'.format(black_score) + \
+                                 'White:     {}'.format(white_score)
+
+            messagebox.showinfo(title='Game Over',
+                                message=game_over_message)
+
+            return
 
         # Update next and previous move buttons
         all_moves = len(self.all_moves)
@@ -494,25 +520,6 @@ class Othello:
         elif len(self.players) > 0:
             self.last_move_label.config(text='Select your move by clicking one of the highlighted legal moves')
 
-        if self.board.is_game_over():
-            black_score, white_score = self.board.get_final_score()
-            game_over_message = 'Game Over!\n'
-            if white_score == black_score:
-                game_over_message += 'We have a tie!!!'
-            else:
-                game_over_message += '{} ({}) Wins the game!!!'.format(
-                    self.players[BLACK] if black_score > white_score else self.players[WHITE],
-                    Board.get_color_string(BLACK) if black_score > white_score else Board.get_color_string(WHITE))
-
-            game_over_message += '\n\nFinal Score of the players:\n' + \
-                                 'Black:      {}\n'.format(black_score) + \
-                                 'White:     {}'.format(white_score)
-
-            messagebox.showinfo(title='Game Over',
-                                message=game_over_message)
-
-            return
-
         # If current player is not human and we're not going through move history, make a move
         if self.current_player != 0 and \
                 self.move_history_index == all_moves and \
@@ -522,13 +529,11 @@ class Othello:
 
         # Update last-move label
         self.last_move_label.configure(text='Last Move: {}'.format(
-            'None' if self.last_move == tuple() else '{} {}'.format(
+            'None' if self.last_move == tuple() or not self.game_started else '{} {}'.format(
                 self.board.get_color_string(self.last_color),
-                "to ' {} '".format(
-                    self.board.move_string(self.last_move)
-                    if self.last_move is not None
-                    else 'PASSED')
-            )))
+                "to ' {} '".format(self.board.move_string(self.last_move))
+                if self.last_move is not None
+                else 'PASSED')))
 
     def start_game(self):
         if self.black_player_name.get() == '' or self.white_player_name.get() == '':
@@ -548,6 +553,10 @@ class Othello:
             messagebox.showerror(title='Player Type Error',
                                  message='At least one of the players should be a human player')
             return
+
+        self.game_started = True
+        self.start_timer()
+        self.stop_timer = False
 
         self.players[BLACK] = create_player(black_player_type, black_player_name)
         self.players[WHITE] = create_player(white_player_type, white_player_name)
@@ -582,6 +591,9 @@ class Othello:
                                    message='Are you sure you want to reset the game?'):
             return
 
+        self.game_started = False
+        self.stop_timer = True
+
         # Enable and disable widgets accordingly
         self.black_player_name_entry.config(state=NORMAL)
         self.black_player_type_combo.config(state=NORMAL)
@@ -591,6 +603,7 @@ class Othello:
         self.reset_button.config(state=DISABLED)
         self.white_player_level_spin.configure(state=DISABLED)
         self.black_level_spin.configure(state=DISABLED)
+        self.timer_label.configure(text='')
 
         self.reset_players()
         self.board = Board()
@@ -602,13 +615,22 @@ class Othello:
 
     def start_timer(self):
         self.timer_label.config(text='Time Remaining: {}'.format(self.time_out_value.get()))
-        self.display_timer()
+        self.timer_label.after(1000, self.display_timer)
 
     def display_timer(self):
+        if self.stop_timer:
+            return
+
         current_value = int(str(self.timer_label.cget('text')).split(': ')[1])
         if current_value == 1:
             self.timer_label.config(text='Time Remaining: 0')
-            print("CHANGE TURN")
+            self.last_color = self.current_player
+            self.last_move = None
+            self.execute_move()
+
+            if not self.board.is_game_over():
+                self.start_timer()
+
         else:
             self.timer_label.config(text='Time Remaining: {}'.format(current_value - 1))
             self.timer_label.after(1000, self.display_timer)
