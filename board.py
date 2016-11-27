@@ -51,7 +51,8 @@ class Board:
 
         # Configure heuristic functions for different agent types
         self.heuristics = dict()
-        self.heuristics[AgentType.greedy] = self.get_count
+        self.heuristics[AgentType.greedy] = self.get_last_flip_count
+        self.heuristics[AgentType.simple] = self.get_token_difference
         self.heuristics[AgentType.composite] = self.composite_heuristic
         self.heuristics[AgentType.mobile] = self.mobile_greedy
         self.heuristics[AgentType.corner] = self.greedy_corner
@@ -333,13 +334,6 @@ class Board:
             elif self[x][y] == -color:
                 flips.append((x, y))
 
-    def get_last_flip_count(self):
-        """
-        Get the number of flips caused by executing the last move on the board
-        :return: number of flips caused by the move
-        """
-        return self.__flips
-
     def _get_flips(self, origin, direction, color):
         """
         Get the list of flips for a vertex and a direction to use within
@@ -365,7 +359,18 @@ class Board:
 
     # ################# Functions used for heuristics ##########################
 
-    def get_count(self):
+    def get_last_flip_count(self):
+        """
+        Get the number of flips caused by executing the last move on the board
+        :return: number of flips caused by the move
+        """
+        return self.__flips
+
+    def get_token_difference(self):
+        """
+        Get the difference between the tokens between the current player and the opponent
+        :return: difference between the tokens in the board
+        """
         return self.count(self.__turn) - self.count(-self.__turn)
 
     # Code for heuristic from here: https://kartikkukreja.wordpress.com/2013/03/30/heuristic-function-for-reversiothello/
