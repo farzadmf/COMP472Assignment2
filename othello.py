@@ -118,12 +118,6 @@ class Othello:
 
         # Buttons for playing the game
         button_width = 13
-        self.make_move_button = ttk.Button(self.buttons_frame, text='Make Move', command=self.make_move,
-                                           name='make_move_button',
-                                           width=button_width)
-        self.make_move_button.img = self.play_icon
-        self.make_move_button.config(image=self.make_move_button.img, compound=LEFT)
-        #self.make_move_button.pack(side=LEFT, padx=10)
 
         self.previous_move_button = ttk.Button(self.buttons_frame, text='Previous Move',
                                                name='previous_move_button',
@@ -448,10 +442,6 @@ class Othello:
 
                     human_move = True
 
-                    # If human doesn't have a move, he has to pass
-                    if len(valid_moves) == 0:
-                        self.make_move_human(None, True)
-
                 # Enable selecting the move by mouse for a human player
                 if move in valid_moves and human_move:
                     cell_label.bind('<ButtonPress-1>', self.make_move_human)
@@ -498,27 +488,6 @@ class Othello:
                                             ' (Current Move: {})'.format(self.move_history_index)
                                             if self.move_history_index != all_moves and self.move_history_index != 0
                                             else ''))
-
-        # The make-move button should be disabled in the following cases:
-        #   *) We're moving through move history and we're not in the last move
-        #   *) No players are configured
-        #   *) Current player is a human player
-        #   *) Game is over (of course!)
-        self.make_move_button.config(state=DISABLED
-                                     if self.move_history_index != all_moves or
-                                     self.current_player == 0 or
-                                     isinstance(self.players[self.current_player], HumanPlayer) or
-                                     self.board.is_game_over()
-
-                                     else NORMAL)
-
-        # Display an instruction message based on make-move button's state:
-        #   *) If it's disabled (and the game has started), player should click on one of the legal moves
-        #   *) It it's enabled, we should click on it to make the computer move
-        if 'disabled' not in self.make_move_button.state():
-            self.last_move_label.config(text="Select 'Make Move' button to execute next move")
-        elif len(self.players) > 0:
-            self.last_move_label.config(text='Select your move by clicking one of the highlighted legal moves')
 
         # If current player is not human and we're not going through move history, make a move
         if self.current_player != 0 and \
@@ -656,7 +625,6 @@ class Othello:
     def make_move(self):
         self.move_thread = threading.Thread(target=self.get_move)
         self.move_thread.daemon = True
-        self.make_move_button.config(state=DISABLED)
         self.progress_bar.start()
         self.move_thread.start()
         self.master.after(20, self.check_move_thread)
