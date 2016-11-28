@@ -25,6 +25,7 @@ class Othello:
         self.move_history_index = 0
         self.game_started = False
         self.stop_timer = False
+        self.timer_job = None
 
         # ++++++++++++++++++++++++++++++ Frames ++++++++++++++++++++++++++++++++++
 
@@ -118,12 +119,6 @@ class Othello:
 
         # Buttons for playing the game
         button_width = 13
-        self.make_move_button = ttk.Button(self.buttons_frame, text='Make Move', command=self.make_move,
-                                           name='make_move_button',
-                                           width=button_width)
-        self.make_move_button.img = self.play_icon
-        self.make_move_button.config(image=self.make_move_button.img, compound=LEFT)
-        #self.make_move_button.pack(side=LEFT, padx=10)
 
         self.previous_move_button = ttk.Button(self.buttons_frame, text='Previous Move',
                                                name='previous_move_button',
@@ -448,10 +443,6 @@ class Othello:
 
                     human_move = True
 
-                    # If human doesn't have a move, he has to pass
-                    if len(valid_moves) == 0:
-                        self.make_move_human(None, True)
-
                 # Enable selecting the move by mouse for a human player
                 if move in valid_moves and human_move:
                     cell_label.bind('<ButtonPress-1>', self.make_move_human)
@@ -498,27 +489,6 @@ class Othello:
                                             ' (Current Move: {})'.format(self.move_history_index)
                                             if self.move_history_index != all_moves and self.move_history_index != 0
                                             else ''))
-
-        # The make-move button should be disabled in the following cases:
-        #   *) We're moving through move history and we're not in the last move
-        #   *) No players are configured
-        #   *) Current player is a human player
-        #   *) Game is over (of course!)
-        self.make_move_button.config(state=DISABLED
-                                     if self.move_history_index != all_moves or
-                                     self.current_player == 0 or
-                                     isinstance(self.players[self.current_player], HumanPlayer) or
-                                     self.board.is_game_over()
-
-                                     else NORMAL)
-
-        # Display an instruction message based on make-move button's state:
-        #   *) If it's disabled (and the game has started), player should click on one of the legal moves
-        #   *) It it's enabled, we should click on it to make the computer move
-        if 'disabled' not in self.make_move_button.state():
-            self.last_move_label.config(text="Select 'Make Move' button to execute next move")
-        elif len(self.players) > 0:
-            self.last_move_label.config(text='Select your move by clicking one of the highlighted legal moves')
 
         # If current player is not human and we're not going through move history, make a move
         if self.current_player != 0 and \
@@ -603,6 +573,7 @@ class Othello:
         self.reset_button.config(state=DISABLED)
         self.white_player_level_spin.configure(state=DISABLED)
         self.black_level_spin.configure(state=DISABLED)
+        self._stop_timer()
         self.timer_label.configure(text='')
 
         self.reset_players()
@@ -615,10 +586,12 @@ class Othello:
 
     def start_timer(self):
         self.timer_label.config(text='Time Remaining: {}'.format(self.time_out_value.get()))
-        self.timer_label.after(1000, self.display_timer)
+        self._stop_timer()
+        self._start_timer()
 
     def display_timer(self):
         if self.stop_timer:
+            self.timer_label.after_cancel(self.timer_job)
             return
 
         current_value = int(str(self.timer_label.cget('text')).split(': ')[1])
@@ -633,7 +606,15 @@ class Othello:
 
         else:
             self.timer_label.config(text='Time Remaining: {}'.format(current_value - 1))
-            self.timer_label.after(1000, self.display_timer)
+            self._stop_timer()
+            self._start_timer()
+
+    def _stop_timer(self):
+        if self.timer_job is not None:
+            self.timer_label.after_cancel(self.timer_job)
+
+    def _start_timer(self):
+        self.timer_job = self.timer_label.after(1000, self.display_timer)
 
     def change_turn(self):
         self.current_player *= -1
@@ -656,7 +637,6 @@ class Othello:
     def make_move(self):
         self.move_thread = threading.Thread(target=self.get_move)
         self.move_thread.daemon = True
-        self.make_move_button.config(state=DISABLED)
         self.progress_bar.start()
         self.move_thread.start()
         self.master.after(20, self.check_move_thread)
@@ -675,6 +655,7 @@ class Othello:
         self.board = self.board.execute_move(self.last_move)
         self.change_turn()
         self.progress_bar.stop()
+        self.start_timer()
         self.update()
 
     def previous_move(self):

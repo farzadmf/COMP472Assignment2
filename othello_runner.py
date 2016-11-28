@@ -83,7 +83,7 @@ class OthelloRunner:
         logger.info('\n{}\n'.format(separator))
         logger.info(header_line)
         logger.info('{}'.format(header))
-        logger.info(header_line)
+        logger.info(header_line + '\n')
         logger.info(move_timeout_message)
         logger.info('-' * len(move_timeout_message))
         logger.info('\n')
@@ -100,8 +100,10 @@ class OthelloRunner:
         logger.info('\n{}\n'.format(separator))
 
     def _play_game(self, level: int):
-        logger.info("Running game with level: '{}': ".format(level))
+        final_message = "Running game with level: '{}': ".format(level)
 
+        logger.debug('+++++++++++ Board Progression +++++++++++\n')
+        move = 0
         start_time = time.time()
         while not self.board.is_game_over():
             # logger.info(self.board)
@@ -112,8 +114,11 @@ class OthelloRunner:
             next_move, _ = current_player.get_best_move(self.board, level, self.time_out)
 
             self.board = self.board.execute_move(next_move)
-            logger.debug(self.board.display_official())
+            move += 1
+            logger.debug('------- Move {:3} ------\n'.format(move))
+            logger.debug(self.board)
         end_time = time.time()
+        logger.debug('-----------------------------------------')
 
         self.scores[BLACK], self.scores[WHITE] = self.board.get_final_score()
         if self.scores[BLACK] == self.scores[WHITE]:
@@ -127,15 +132,15 @@ class OthelloRunner:
             self.winner = WHITE
 
         if self.scores[BLACK] == self.scores[WHITE]:
-            logger.info('{}'.format(' The game was a tie'))
+            final_message += '{}'.format(' The game was a tie')
         else:
-            logger.info('{}'.format(" '{}' defeats '{}'. Score: {:2} to {:2}".format(
+            final_message += '{}'.format(" '{}' defeats '{}'. Score: {:2} to {:2}".format(
                 Board.get_color_string(self.winner), Board.get_color_string(-self.winner),
-                self.scores[self.winner], self.scores[-self.winner]
-            )))
+                self.scores[self.winner], self.scores[-self.winner]))
 
         elapsed_time = end_time - start_time
-        logger.info(' (time: {:7.3}s)'.format(elapsed_time))
+        final_message += ' (time: {:7.3}s)'.format(elapsed_time)
+        logger.info(final_message)
 
     def print_final_results(self):
         logger.info('\nFinal Results:')
