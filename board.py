@@ -578,7 +578,6 @@ class Board:
             return self.count(-self.__turn) - self.count(self.__turn)
         return self.get_token_difference()
 
-
     def mobility(self):
         """
         This heuristic aims to calculate the respective contrast between the moves from the
@@ -652,7 +651,7 @@ class Board:
         :param col: number corresponding to the desired column
         :return: the alphabetical representation of the specified column
         """
-        return chr(ord('a') + col)
+        return chr(ord('A') + col)
 
     @staticmethod
     def moves_string(moves):
