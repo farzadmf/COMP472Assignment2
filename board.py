@@ -534,12 +534,26 @@ class Board:
     # ##########################################################################
 
     def mobile_greedy(self):
+        """
+        This corner mixes the greedy approach with a relatively low weight and a higher weight
+        on the mobility heuristic.
+        """
         return 10 * self.get_token_difference() + 42 * self.mobility()
 
     def greedy_corner(self):
+        """
+        This corner mixes the greedy approach with a low weight and a high weight
+        on the corner heuristic.
+        """
         return 10 * self.get_token_difference() + 801 * self.corner_occupancy()
 
     def mobility(self):
+        """
+        This heuristic aims to calculate the respective contrast between the moves from the
+        max player with the min player.
+        The purpose of this heuristic is to restrict the adversary mobility
+        and expand its own mobility.
+        """
         # Get my moves
         my_moves = len(self.get_legal_moves(self.__turn))
         opponent_moves = len(self.get_legal_moves(-self.__turn))
@@ -552,6 +566,13 @@ class Board:
             return 0
 
     def corner_occupancy(self):
+        """
+        The corners of the othello board have a high value, i.e. the token cannot be flipped,
+        and they allow a player to place tokens around them and provide stability to the player’s token.
+        Effectively giving the player a higher chance to win.
+        This heuristic simply establishes a score on them based on the adversary and the current players
+        token that are in the corners.
+        """
         my_tiles = 0
         opponent_tiles = 0
         if self[0][0] == self.__turn:
@@ -574,6 +595,8 @@ class Board:
         elif self[7][7] == -self.__turn:
             opponent_tiles += 1
 
+        # Here we multiply by 25 the score to give a special emphasis on the
+        # corners.
         return 25 * (my_tiles - opponent_tiles)
 
     @staticmethod
