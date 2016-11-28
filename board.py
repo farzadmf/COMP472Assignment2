@@ -553,14 +553,14 @@ class Board:
 
     def mobile_greedy(self):
         """
-        This corner mixes the greedy approach with a relatively low weight and a higher weight
+        This heuristics mixes the greedy approach with a relatively low weight and a higher weight
         on the mobility heuristic.
         """
         return 10 * self.get_token_difference() + 42 * self.mobility()
 
     def greedy_corner(self):
         """
-        This corner mixes the greedy approach with a low weight and a high weight
+        This heuristics mixes the greedy approach with a low weight and a high weight
         on the corner heuristic.
         """
         return 10 * self.get_token_difference() + 801 * self.corner_occupancy()
