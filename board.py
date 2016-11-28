@@ -534,10 +534,10 @@ class Board:
     # ##########################################################################
 
     def mobile_greedy(self):
-        return (10 * self.get_count() + 42 * self.mobility())
+        return 10 * self.get_token_difference() + 42 * self.mobility()
 
     def greedy_corner(self):
-        return (10 * self.get_count() + 801 * self.corner_occupancy())
+        return 10 * self.get_token_difference() + 801 * self.corner_occupancy()
 
     def mobility(self):
         # Get my moves
@@ -546,7 +546,7 @@ class Board:
 
         if my_moves > opponent_moves:
             return (100 * my_moves) / (my_moves + opponent_moves)
-        elif myMoves < opponentMoves:
+        elif my_moves < opponent_moves:
             return (-100 * opponent_moves) / (my_moves + opponent_moves)
         else:
             return 0
