@@ -8,6 +8,7 @@ class AgentType(Enum):
     composite = 'Composite'
     mobile = 'Mobile'
     corner = 'Corner'
+    half = 'Half'
 
 
 class AlphaBeta:

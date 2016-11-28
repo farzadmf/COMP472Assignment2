@@ -10,6 +10,7 @@ class PlayerType(Enum):
     composite = 'Composite'
     mobile = 'Mobile'
     corner = 'Corner'
+    half = 'Half'
 
 
 class Player:
@@ -91,6 +92,15 @@ class CornerPlayer(Player):
     def get_type_name(self):
         return 'Corner'
 
+class HalfPlayer(Player):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.player_type = AgentType.half
+
+    def get_type_name(self):
+        return 'Half'
+
 def create_player(player_type: PlayerType, player_name: str):
     """
     Create a player based on the type
@@ -110,3 +120,5 @@ def create_player(player_type: PlayerType, player_name: str):
         return MobilePlayer(player_name)
     if player_type == PlayerType.corner:
         return CornerPlayer(player_name)
+    if player_type == PlayerType.half:
+        return HalfPlayer(player_name)

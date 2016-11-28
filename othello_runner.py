@@ -1,7 +1,13 @@
-from player import Player, PlayerType, create_player
-from board import Board, BLACK, WHITE
+"""
+Run Game in the console (AI vs AI).
+"""
 import time
 import argparse
+
+# User defined modules
+from player import Player, PlayerType, create_player
+from board import Board, BLACK, WHITE
+from log import logger
 
 # Valid choices for player type
 player_types = [member.value for _, member in PlayerType.__members__.items() if member.value != 'Human']
@@ -74,14 +80,13 @@ class OthelloRunner:
             args.time_out, 's' if args.time_out > 1 else '')
         header_line = '+{}+'.format('-' * header_length)
         separator = '=' * separator_length
-        print('\n{}\n'.format(separator))
-        print(header_line)
-        print('{}'.format(header))
-        print(header_line)
-        print()
-        print(move_timeout_message)
-        print('-' * len(move_timeout_message))
-        print('\n')
+        logger.info('\n{}\n'.format(separator))
+        logger.info(header_line)
+        logger.info('{}'.format(header))
+        logger.info(header_line)
+        logger.info(move_timeout_message)
+        logger.info('-' * len(move_timeout_message))
+        logger.info('\n')
 
         for level in range(min_level, max_level + 1):
             self.board = Board()
@@ -92,21 +97,22 @@ class OthelloRunner:
             self._play_game(level)
 
         self.print_final_results()
-        print('\n{}\n'.format(separator))
+        logger.info('\n{}\n'.format(separator))
 
     def _play_game(self, level: int):
-        print("Running game with level: '{}': ".format(level), end='')
+        logger.info("Running game with level: '{}': ".format(level))
 
         start_time = time.time()
         while not self.board.is_game_over():
-            # print(self.board)
-            # print(Board.get_color_string(self.board.get_turn()))
+            # logger.info(self.board)
+            # logger.info(Board.get_color_string(self.board.get_turn()))
             # input()
             current_player = self.players[self.board.get_turn()]  # type: Player
 
             next_move, _ = current_player.get_best_move(self.board, level, self.time_out)
 
             self.board = self.board.execute_move(next_move)
+            logger.debug(self.board.display_official())
         end_time = time.time()
 
         self.scores[BLACK], self.scores[WHITE] = self.board.get_final_score()
@@ -121,27 +127,27 @@ class OthelloRunner:
             self.winner = WHITE
 
         if self.scores[BLACK] == self.scores[WHITE]:
-            print('{:43}'.format(' The game was a tie'), end='')
+            logger.info('{}'.format(' The game was a tie'))
         else:
-            print('{:43}'.format(" '{}' defeats '{}'. Score: {:2} to {:2}".format(
+            logger.info('{}'.format(" '{}' defeats '{}'. Score: {:2} to {:2}".format(
                 Board.get_color_string(self.winner), Board.get_color_string(-self.winner),
                 self.scores[self.winner], self.scores[-self.winner]
-            )), end='')
+            )))
 
         elapsed_time = end_time - start_time
-        print(' (time: {:7.3}s)'.format(elapsed_time))
+        logger.info(' (time: {:7.3}s)'.format(elapsed_time))
 
     def print_final_results(self):
-        print('\nFinal Results:')
-        print('\t{:23} {}\n\t{:23} {}\n\t{:23} {}'.format(
-            'Number of black wins:', self.wins[BLACK],
-            'Number of white wins:', self.wins[WHITE],
-            'Number of ties:', self.ties))
+        logger.info('\nFinal Results:')
+        logger.info('\t{:23} {}\n\t{:23} {}\n\t{:23} {}'.format(
+                'Number of black wins:', self.wins[BLACK],
+                'Number of white wins:', self.wins[WHITE],
+                'Number of ties:', self.ties))
 
 
 if __name__ == '__main__':
     if args.black_player is None or args.white_player is None:
-        print('You must specify both player types')
+        logger.info('You must specify both player types')
         exit(1)
 
     black_player_type = PlayerType(args.black_player)

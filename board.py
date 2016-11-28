@@ -56,6 +56,7 @@ class Board:
         self.heuristics[AgentType.composite] = self.composite_heuristic
         self.heuristics[AgentType.mobile] = self.mobile_greedy
         self.heuristics[AgentType.corner] = self.greedy_corner
+        self.heuristics[AgentType.half] = self.half_greedy
 
     def clone(self):
         """
@@ -93,7 +94,24 @@ class Board:
         """ Check whether the game is over """
         return len(self.get_legal_moves(WHITE)) == 0 and len(self.get_legal_moves(BLACK)) == 0
 
-    # ###def display(self, time):
+    def display_official(self):
+        """Board display according to specs."""
+        result = "(\n"
+        for y in range(7, -1, -1):
+            result += "("
+            for x in range(8):
+                # Get the piece to print
+                piece = self[x][y]
+                if piece == -1:
+                    result += "B"
+                elif piece == 1:
+                    result += "W"
+                else:
+                    result += "0"
+            result += ")\n"
+        result += ")"
+        return result
+
     def __display(self):
         """" Display the board and the statistics of the ongoing game. """
         # ###print("    A B C D E F G H")
@@ -546,6 +564,20 @@ class Board:
         on the corner heuristic.
         """
         return 10 * self.get_token_difference() + 801 * self.corner_occupancy()
+
+    def half_greedy(self):
+        """
+        In the first half of the game (until there are fewer then 32 tokens on the board)
+        This heuristic is the opposite of greedy, meaning that it gives advantages to the adversary.
+        When half of the game is reached this heuristic becomes greedy.
+        """
+        my_tiles = len(self.get_legal_moves(self.__turn))
+        opponent_tiles = len(self.get_legal_moves(-self.__turn))
+
+        if (my_tiles + opponent_tiles) < 32:
+            return self.count(-self.__turn) - self.count(self.__turn)
+        return self.get_token_difference()
+
 
     def mobility(self):
         """
