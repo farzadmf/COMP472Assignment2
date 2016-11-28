@@ -25,6 +25,7 @@ class Othello:
         self.move_history_index = 0
         self.game_started = False
         self.stop_timer = False
+        self.timer_job = None
 
         # ++++++++++++++++++++++++++++++ Frames ++++++++++++++++++++++++++++++++++
 
@@ -572,6 +573,7 @@ class Othello:
         self.reset_button.config(state=DISABLED)
         self.white_player_level_spin.configure(state=DISABLED)
         self.black_level_spin.configure(state=DISABLED)
+        self._stop_timer()
         self.timer_label.configure(text='')
 
         self.reset_players()
@@ -584,10 +586,12 @@ class Othello:
 
     def start_timer(self):
         self.timer_label.config(text='Time Remaining: {}'.format(self.time_out_value.get()))
-        self.timer_label.after(1000, self.display_timer)
+        self._stop_timer()
+        self._start_timer()
 
     def display_timer(self):
         if self.stop_timer:
+            self.timer_label.after_cancel(self.timer_job)
             return
 
         current_value = int(str(self.timer_label.cget('text')).split(': ')[1])
@@ -602,7 +606,15 @@ class Othello:
 
         else:
             self.timer_label.config(text='Time Remaining: {}'.format(current_value - 1))
-            self.timer_label.after(1000, self.display_timer)
+            self._stop_timer()
+            self._start_timer()
+
+    def _stop_timer(self):
+        if self.timer_job is not None:
+            self.timer_label.after_cancel(self.timer_job)
+
+    def _start_timer(self):
+        self.timer_job = self.timer_label.after(1000, self.display_timer)
 
     def change_turn(self):
         self.current_player *= -1
@@ -643,6 +655,7 @@ class Othello:
         self.board = self.board.execute_move(self.last_move)
         self.change_turn()
         self.progress_bar.stop()
+        self.start_timer()
         self.update()
 
     def previous_move(self):
